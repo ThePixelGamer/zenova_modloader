@@ -2,11 +2,11 @@
 #include <ShlObj.h>
 #include <AclAPI.h>
 #include <Shlwapi.h>
+#include <Sddl.h>
 #include "ModLoader.h"
 #include "utils.h"
 
-DWORD ModLoader::AdjustGroupPolicy(std::wstring wstrFilePath)
-{
+DWORD ModLoader::AdjustGroupPolicy(std::wstring wstrFilePath) {
 	PACL pOldDACL = NULL, pNewDACL = NULL;
 	PSECURITY_DESCRIPTOR pSD = NULL;
 	EXPLICIT_ACCESS eaAccess;
