@@ -5,10 +5,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZenovaWPF
-{
-    public enum PACKAGE_EXECUTION_STATE
-    {
+namespace ZenovaWPF {
+    public enum PACKAGE_EXECUTION_STATE {
         PES_UNKNOWN = 0, // The app is likely not running
         PES_RUNNING = 1, // The app is running
         PES_SUSPENDING = 2, // The app is being suspended
@@ -17,8 +15,7 @@ namespace ZenovaWPF
         PES_ERROR = 5 // There was an error in getting the execution state
     }
 
-    class StateChangeCallback
-    {
+    class StateChangeCallback {
         private MainWindow window;
         private delegate void Callback(int state);
         private Callback mInstance;
@@ -30,32 +27,27 @@ namespace ZenovaWPF
         [DllImport("ZenovaLauncher.dll")]
         private static extern void UnregisterStateChanges();
 
-        public StateChangeCallback(MainWindow someWindow)
-        {
+        public StateChangeCallback(MainWindow someWindow) {
             window = someWindow;
             mInstance = new Callback(Handler);
             SetStateChangeCallback(mInstance);
         }
 
-        private void Handler(int state)
-        {
+        private void Handler(int state) {
             currentState = (PACKAGE_EXECUTION_STATE)state;
             window.updatePlayText(LauncherWrapper.executionStateAsString(currentState));
         }
 
-        public PACKAGE_EXECUTION_STATE getState()
-        {
+        public PACKAGE_EXECUTION_STATE getState() {
             return currentState;
         }
 
-        public void unregister()
-        {
+        public void unregister() {
             UnregisterStateChanges();
         }
     }
 
-    public partial class LauncherWrapper
-    {
+    public partial class LauncherWrapper {
         /*
          * Import functions from ZenovaLauncher.dll
          */
@@ -71,10 +63,8 @@ namespace ZenovaWPF
         [DllImport("ZenovaLauncher.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern PACKAGE_EXECUTION_STATE GetMinecraftExecutionState();
 
-        public static string executionStateAsString(PACKAGE_EXECUTION_STATE state)
-        {
-            switch (state)
-            {
+        public static string executionStateAsString(PACKAGE_EXECUTION_STATE state) {
+            switch(state) {
                 case PACKAGE_EXECUTION_STATE.PES_UNKNOWN:
                     return "Unknown";
                 case PACKAGE_EXECUTION_STATE.PES_RUNNING:

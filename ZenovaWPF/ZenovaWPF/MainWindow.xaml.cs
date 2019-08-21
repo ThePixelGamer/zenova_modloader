@@ -19,34 +19,27 @@ using System.Threading;
 
 using MahApps.Metro.Controls;
 
-namespace ZenovaWPF
-{
-    public static class ExtensionMethods
-    {
+namespace ZenovaWPF {
+    public static class ExtensionMethods {
         private static Action Delegate = delegate () { };
 
-        public static void Refresh(this UIElement element)
-        {
+        public static void Refresh(this UIElement element) {
             element.Dispatcher.Invoke(DispatcherPriority.Render, Delegate);
         }
     }
 
-    public partial class MainWindow : MetroWindow
-    {
+    public partial class MainWindow : MetroWindow {
         private StateChangeCallback test;
-        public MainWindow()
-        {
+        public MainWindow() {
             InitializeComponent();
             test = new StateChangeCallback(this);
         }
 
-        public void CloseWindow()
-        {
+        public void CloseWindow() {
 
         }
 
-        private void Tile_Click(object sender, RoutedEventArgs e)
-        {
+        private void Tile_Click(object sender, RoutedEventArgs e) {
             //string oldText = PlayButton.Count;
             //PlayButton.Count = "Launching...";
             //PlayButton.Refresh();
@@ -55,18 +48,15 @@ namespace ZenovaWPF
             //PlayButton.Refresh();
         }
 
-        private void OpenMinecraftFolder(object sender, RoutedEventArgs e)
-        {
+        private void OpenMinecraftFolder(object sender, RoutedEventArgs e) {
             LauncherWrapper.OpenMinecraftFolder();
         }
 
-        private void OpenModsFolder(object sender, RoutedEventArgs e)
-        {
+        private void OpenModsFolder(object sender, RoutedEventArgs e) {
             LauncherWrapper.OpenModsFolder();
         }
 
-        public void updatePlayText(string text)
-        {
+        public void updatePlayText(string text) {
             PlayButton.Count = text;
             PlayButton.Refresh();
         }

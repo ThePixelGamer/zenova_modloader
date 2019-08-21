@@ -12,28 +12,23 @@ IMPORT char** __argv;
 //IMPORT wchar_t** __wargv;
 
 // Turning this into a normal Windows program hides the GUI
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-{
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 	DWORD dwProcessId = 0;
 
-	for (int i = 1; i < __argc; i += 2)
-	{
+	for(int i = 1; i < __argc; i += 2) {
 		//printf("%s, %s\n", __argv[i], __argv[i+1]);
 		std::string arg(__argv[i]);
-		if (arg == "-p")
-		{
+		if(arg == "-p") {
 			dwProcessId = atoi(__argv[i + 1]);
 		}
 	}
-	
-	if (dwProcessId != 0 && SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED)))
-	{
+
+	if(dwProcessId != 0 && SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))) {
 
 		std::wstring AppFullName = AppUtils::GetMinecraftPackageId();
 		AppUtils::AppDebugger app(AppFullName);
 
-		if (app.GetPackageExecutionState() == PES_UNKNOWN)
-		{
+		if(app.GetPackageExecutionState() == PES_UNKNOWN) {
 			CoUninitialize();
 			return E_FAIL;
 		}
@@ -47,5 +42,5 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		CoUninitialize();
 	}
 
-    return S_OK;
+	return S_OK;
 }
