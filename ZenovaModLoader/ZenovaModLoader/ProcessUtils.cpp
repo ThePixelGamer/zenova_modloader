@@ -6,8 +6,7 @@
 
 #include "ProcessUtils.h"
 
-void ProcessUtils::SuspendProcess(DWORD processId)
-{
+void ProcessUtils::SuspendProcess(DWORD processId) {
 	HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
 	ProcessUtils::NtSuspendProcess pfnNtSuspendProcess = (ProcessUtils::NtSuspendProcess)GetProcAddress(GetModuleHandle(L"ntdll"), "NtSuspendProcess");
@@ -16,8 +15,7 @@ void ProcessUtils::SuspendProcess(DWORD processId)
 	CloseHandle(processHandle);
 }
 
-void ProcessUtils::ResumeProcess(DWORD processId)
-{
+void ProcessUtils::ResumeProcess(DWORD processId) {
 	HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
 	ProcessUtils::NtResumeProcess pfnNtResumeProcess = (ProcessUtils::NtResumeProcess)GetProcAddress(GetModuleHandle(L"ntdll"), "NtResumeProcess");
@@ -26,8 +24,7 @@ void ProcessUtils::ResumeProcess(DWORD processId)
 	CloseHandle(processHandle);
 }
 
-void ProcessUtils::TerminateProcess(DWORD processId)
-{
+void ProcessUtils::TerminateProcess(DWORD processId) {
 	HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
 	ProcessUtils::NtTerminateProcess pfnNtTerminateProcess = (ProcessUtils::NtTerminateProcess)GetProcAddress(GetModuleHandle(L"ntdll"), "NtTerminateProcess");
@@ -37,26 +34,22 @@ void ProcessUtils::TerminateProcess(DWORD processId)
 }
 
 /* Gets the running processId of an application given its process name */
-DWORD ProcessUtils::GetProcessId(const std::wstring& processName)
-{
+DWORD ProcessUtils::GetProcessId(const std::wstring& processName) {
 	PROCESSENTRY32 processInfo;
 	processInfo.dwSize = sizeof(processInfo);
 
 	HANDLE processesSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-	if (processesSnapshot == INVALID_HANDLE_VALUE)
+	if(processesSnapshot == INVALID_HANDLE_VALUE)
 		return 0;
 
 	Process32First(processesSnapshot, &processInfo);
-	if (!processName.compare(processInfo.szExeFile))
-	{
+	if(!processName.compare(processInfo.szExeFile)) {
 		CloseHandle(processesSnapshot);
 		return processInfo.th32ProcessID;
 	}
 
-	while (Process32Next(processesSnapshot, &processInfo))
-	{
-		if (!processName.compare(processInfo.szExeFile))
-		{
+	while(Process32Next(processesSnapshot, &processInfo)) {
+		if(!processName.compare(processInfo.szExeFile)) {
 			CloseHandle(processesSnapshot);
 			return processInfo.th32ProcessID;
 		}

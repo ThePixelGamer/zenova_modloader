@@ -30,19 +30,32 @@
     </Grid>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
-            <Button Content="open mods buttun" Click="OpenModsFolder"/>
-            <Button Click="OpenMinecraftFolder">
+            <Button Click="OpenModsFolder">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="20" Height="20"
                     Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
                         <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_futurama_fry}" />
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_folder_open}" />
                         </Rectangle.OpacityMask>
                     </Rectangle>
 
                     <TextBlock Margin="4 0 0 0"
                     VerticalAlignment="Center"
-                    Text="eat cupcakes" />
+                    Text="Mods Folder" />
+                </StackPanel>
+            </Button>
+            <Button Click="OpenMinecraftFolder">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20"
+                    Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_folder_open}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+
+                    <TextBlock Margin="4 0 0 0"
+                    VerticalAlignment="Center"
+                    Text="Minecraft Folder" />
                 </StackPanel>
             </Button>
         </Controls:WindowCommands>

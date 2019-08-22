@@ -30,7 +30,7 @@ namespace AppUtils
 {
 	// String found in HKEY_CLASSES_ROOT\AppX[MinecraftPackage]
 	// Need to find some way to not be dependent on this string
-	#define MINECRAFT_DEFAULT_NAME L"Minecraft: Windows 10 Edition Beta"
+	#define MINECRAFT_DEFAULT_NAME L"Minecraft"
 
 	/* 
 	 * Returns the PackageId found in the registry location:
