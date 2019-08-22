@@ -18,6 +18,7 @@ using System.Windows.Threading;
 using System.Threading;
 
 using MahApps.Metro.Controls;
+using System.IO;
 
 namespace ZenovaWPF {
     public static class ExtensionMethods {
@@ -33,6 +34,8 @@ namespace ZenovaWPF {
         public MainWindow() {
             InitializeComponent();
             test = new StateChangeCallback(this);
+
+            FillModList(ref listBox);
         }
 
         public void CloseWindow() {
@@ -56,6 +59,15 @@ namespace ZenovaWPF {
             LauncherWrapper.OpenModsFolder();
         }
 
+        private void AddMod(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void FillModList(ref ListBox tmp) {
+            var dirs = Directory.GetFiles(@Environment.ExpandEnvironmentVariables("%AppData%") + "\\Zenova\\Mods", "*.dll").Select(System.IO.Path.GetFileName);
+            foreach(string fileName in dirs)
+                tmp.Items.Add(fileName);
+        }
         public void updatePlayText(string text) {
             PlayButton.Count = text;
             PlayButton.Refresh();

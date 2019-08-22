@@ -8,15 +8,32 @@
         BorderThickness="0" GlowBrush="Black" ResizeMode="CanResizeWithGrip"
         WindowTransitionsEnabled="False" WindowStartupLocation="CenterScreen">
     <Grid>
-        <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="256" Margin="10,10,0,0" VerticalAlignment="Top" Width="499" Controls:TabControlHelper.IsUnderlined="True">
+        <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="256" Margin="10,10,0,0" VerticalAlignment="Top" Width="507" Controls:TabControlHelper.IsUnderlined="True">
             <TabItem Header="Mods">
                 <Grid Background="#FFFFFFFF">
-                    <ListBox x:Name="listBox" ItemsSource="{Binding}" HorizontalAlignment="Left" Height="228" VerticalAlignment="Top" Width="231"/>
-
+                    <ListBox x:Name="listBox" ItemsSource="{Binding}" HorizontalAlignment="Left" Height="228" VerticalAlignment="Top" Width="446"/>
+                    <Button Click="AddMod" Width="40" Height="40" Margin="451,0,10,150">
+                        <Rectangle Width="20" Height="20" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_add}"></VisualBrush>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </Button>
+                    <Button Click="AddMod" Width="40" Height="40" Margin="451,55,10,80">
+                        <Rectangle Width="20" Height="20" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_minus}"></VisualBrush>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </Button>
+                    <Button Click="AddMod" Width="40" Height="40" Margin="451,110,10,10">
+                        <Rectangle Width="20" Height="20" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Uniform" Visual="{StaticResource appbar_list_delete_inline}"></VisualBrush>
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </Button>
                 </Grid>
-            </TabItem>
-            <TabItem Header="Texture Packs">
-                <Grid Background="#FFFFFFFF"/>
             </TabItem>
             <TabItem Header="Settings">
                 <Grid Background="#FFFFFFFF"/>

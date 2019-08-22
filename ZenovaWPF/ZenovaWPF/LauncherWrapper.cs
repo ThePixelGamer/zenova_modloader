@@ -55,13 +55,13 @@ namespace ZenovaWPF {
         public static extern void LaunchMinecraft(bool forceRestart);
 
         [DllImport("ZenovaLauncher.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern PACKAGE_EXECUTION_STATE GetMinecraftExecutionState();
+
+        [DllImport("ZenovaLauncher.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void OpenMinecraftFolder();
 
         [DllImport("ZenovaLauncher.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void OpenModsFolder();
-
-        [DllImport("ZenovaLauncher.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern PACKAGE_EXECUTION_STATE GetMinecraftExecutionState();
 
         public static string executionStateAsString(PACKAGE_EXECUTION_STATE state) {
             switch(state) {
