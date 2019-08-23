@@ -77,8 +77,7 @@ namespace AppUtils
 	};
 
 	// Wrapper for IPackageDebugSettings
-	class AppDebugger
-	{
+	class AppDebugger {
 	public:
 		AppDebugger(const std::wstring& PackageId);
 		virtual ~AppDebugger();
