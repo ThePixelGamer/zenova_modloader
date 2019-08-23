@@ -2,6 +2,13 @@
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 // (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphics context creation, etc.)
 
+//Appx
+#include <iostream>
+#include "AppUtils.h"
+#include "ProcessUtils.h"
+#include "utils.h"
+
+//UI
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_dx11.h"
@@ -9,9 +16,8 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_syswm.h>
-#include "../../ZenovaLauncher/ZenovaLauncher/ZenovaLauncher.h"
 
-#include <iostream>
+AppUtils::AppDebugger* app;
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -19,8 +25,11 @@ static ID3D11DeviceContext*     g_pd3dDeviceContext = NULL;
 static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
 
-// Forward declarations of launcher functions'
+// Forward declarations of launcher functions
 int Handler(int);
+HRESULT launchAppxPackage(LPCWSTR, PDWORD);
+void LaunchMinecraft(bool);
+std::wstring GetMinecraftApplicationId();
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND);
@@ -31,7 +40,7 @@ void CleanupRenderTarget();
 PACKAGE_EXECUTION_STATE currentState = PACKAGE_EXECUTION_STATE::PES_UNKNOWN;
 
 // Main code
-int main(int, char**) {
+int wmain(int argumentsSize, wchar_t** arguments) {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
         std::cout << "Error: " << SDL_GetError() << std::endl;
@@ -88,7 +97,10 @@ int main(int, char**) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	//Initalize Launcher Stuff
-	SetStateChangeCallback(Handler);
+	if(!app) {
+		app = new AppUtils::AppDebugger(AppUtils::GetMinecraftPackageId());
+	}
+	//SetStateChangeCallback(Handler);
 
     // Main loop
     bool done = false;
@@ -126,7 +138,8 @@ int main(int, char**) {
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
+            if(ImGui::Button("Launch Minecraft"))
+				show_another_window = true;
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
@@ -142,6 +155,8 @@ int main(int, char**) {
 
         // 3. Show another simple window.
         if (show_another_window) {
+			show_another_window = false;
+
 			LaunchMinecraft(true);
         }
 
@@ -172,6 +187,162 @@ int Handler(int state) {
 	currentState = (PACKAGE_EXECUTION_STATE)state;
 	//update launcher button
 	return 0;
+}
+
+HRESULT launchAppxPackage(LPCWSTR packageFamilyName, PDWORD applicationId) {
+	HRESULT result = CoInitialize(nullptr);
+	if (SUCCEEDED(result)) {
+		{
+			CComPtr<IApplicationActivationManager> applicationActivationManager;
+			result = CoCreateInstance(CLSID_ApplicationActivationManager, NULL, CLSCTX_LOCAL_SERVER, IID_IApplicationActivationManager, (LPVOID*)&applicationActivationManager);
+			if (SUCCEEDED(result)) {
+				result = CoAllowSetForegroundWindow(applicationActivationManager, NULL);
+				if (SUCCEEDED(result)) {
+					result = applicationActivationManager->ActivateApplication(packageFamilyName, NULL, AO_NONE, applicationId);
+					if (SUCCEEDED(result)) {
+						std::wcout << applicationId << std::endl;
+						return S_OK;
+					}
+					else {
+						std::wcerr << L"Error in ActivateApplication 0x" << std::hex << result << std::endl;
+					}
+				}
+				else {
+					std::wcerr << L"Error in CoAllowSetForegroundWindow 0x" << std::hex << result << std::endl;
+				}
+			}
+			else {
+				std::wcerr << L"Error in CoCreateInstance 0x" << std::hex << result << std::endl;
+			}
+		}
+
+		CoUninitialize();
+	}
+	else {
+		std::wcerr << L"Error in CoInitialize 0x" << std::hex << result << std::endl;
+	}
+
+	return E_UNEXPECTED;
+}
+
+void LaunchMinecraft(bool forceRestart) {
+	HRESULT hresult = S_OK;
+
+	if(!app) return;
+
+	if(SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))) {
+		if(app->GetPackageExecutionState() != PES_UNKNOWN) {
+			if(forceRestart) {
+				app->TerminateAllProcesses();
+				hresult = app->GetHRESULT();
+				if(hresult != S_OK) {
+					//std::cout << "Failed to restart Minecraft, HRESULT: " << hresult << std::endl;
+					//system("PAUSE");
+					return;
+				}
+			}
+			else
+				return;
+		}
+
+		std::wstring ModLoaderPath = Util::GetCurrentDirectory();
+		if(ModLoaderPath.length() == 0) {
+			//std::cout << "Failed to get the current directory" << std::endl;
+			//system("PAUSE");
+			CoUninitialize();
+			return;//  E_FAIL;
+		}
+
+		ModLoaderPath += L"ZenovaModLoader.exe";
+		if(!PathFileExists(ModLoaderPath.c_str())) {
+			//std::cout << "Couldn't find ZenovaModLoader.exe" << std::endl;
+			//system("PAUSE");
+			CoUninitialize();
+			return;//  E_FAIL;
+		}
+
+		app->EnableDebugging(ModLoaderPath);
+		hresult = app->GetHRESULT();
+		if(hresult != S_OK) {
+			//std::cout << "Could not enable debugging, HRESULT: " << hresult << std::endl;
+			//system("PAUSE");
+			CoUninitialize();
+			return;//  hresult;
+		}
+
+		DWORD dwProcessId = 0;
+		std::wstring ApplicationId = AppUtils::GetMinecraftApplicationId();
+		if(ApplicationId.length() == 0) return;// E_FAIL;
+		hresult = AppUtils::LaunchApplication(ApplicationId.c_str(), &dwProcessId);
+		if(hresult != S_OK) {
+			//std::cout << "Failed to launch Minecraft, HRESULT: " << hresult << std::endl;
+			//system("PAUSE");
+			CoUninitialize();
+			return;
+		}
+		else {
+			//std::cout << "Sucessfully launched Minecraft with mods\n";
+		}
+
+		app->DisableDebugging();
+		hresult = app->GetHRESULT();
+		if(hresult != S_OK) {
+			//std::cout << "Could not disable debugging, HRESULT: " << hresult << std::endl;
+			//system("PAUSE");
+			CoUninitialize();
+			return;//  hresult;
+		}
+
+		//system("PAUSE");
+		CoUninitialize();
+	}
+
+	return;//  S_OK;
+}
+
+std::wstring GetMinecraftApplicationId() {
+	std::wstring appId;
+
+	ATL::CRegKey key, subKey;
+	LPTSTR szBuffer = new WCHAR[1024], szSubBuffer = new WCHAR[1024];
+	DWORD dwBufferLen = 1024, dwSubBufferLen = 1024;
+	DWORD index = 0;
+
+	LRESULT result = ERROR_SUCCESS;
+
+	result = key.Open(HKEY_CLASSES_ROOT, L"", KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE | KEY_READ);
+	if(result != ERROR_SUCCESS) return appId;
+
+	for(; key.EnumKey(index, szBuffer, &dwBufferLen, NULL) == ERROR_SUCCESS; dwBufferLen = 1024, index++) {
+		std::wstring keyName(szBuffer);
+		if(keyName.substr(0, 4) != L"AppX") continue;
+
+		result = subKey.Open(HKEY_CLASSES_ROOT, keyName.c_str(), KEY_QUERY_VALUE | KEY_READ);
+		if(result != ERROR_SUCCESS) continue;
+
+		dwSubBufferLen = 1024;
+		result = subKey.QueryStringValue(L"", szSubBuffer, &dwSubBufferLen);
+		if(result != ERROR_SUCCESS) continue;
+
+		std::wstring keyValue(szSubBuffer);
+		if(keyValue.find(MINECRAFT_DEFAULT_NAME) == keyValue.npos) continue;
+
+		dwSubBufferLen = 1024;
+		result = subKey.Open(HKEY_CLASSES_ROOT, (keyName + L"\\Application").c_str(), KEY_QUERY_VALUE | KEY_READ);
+		if(result != ERROR_SUCCESS) continue;
+
+		result = subKey.QueryStringValue(L"AppUserModelID", szSubBuffer, &dwSubBufferLen);
+		if(result != ERROR_SUCCESS) continue;
+
+		appId = szSubBuffer;
+
+		break;
+	}
+
+	subKey.Close();
+	key.Close();
+
+	return appId;
 }
 
 // Helper functions
