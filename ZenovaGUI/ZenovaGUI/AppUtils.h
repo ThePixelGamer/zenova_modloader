@@ -83,7 +83,7 @@ namespace AppUtils {
 		HRESULT GetHRESULT();
 
 		void DisableDebugging();
-		void EnableDebugging(std::wstring commandLineParameters);
+		void EnableDebugging(std::wstring);
 		void Suspend();
 		void Resume();
 		void TerminateAllProcesses();

@@ -4,6 +4,8 @@
 
 //Appx
 #include <iostream>
+#include <sstream>
+#include <string>
 #include "AppUtils.h"
 #include "ProcessUtils.h"
 #include "utils.h"
@@ -26,10 +28,7 @@ static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
 
 // Forward declarations of launcher functions
-int Handler(int);
-HRESULT launchAppxPackage(LPCWSTR, PDWORD);
 void LaunchMinecraft(bool);
-std::wstring GetMinecraftApplicationId();
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND);
@@ -37,7 +36,31 @@ void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
 
-PACKAGE_EXECUTION_STATE currentState = PACKAGE_EXECUTION_STATE::PES_UNKNOWN;
+std::string currentState = "Unknown";
+void StateChangeCallbackFunc(PACKAGE_EXECUTION_STATE state) {
+	switch(state) {
+        case PACKAGE_EXECUTION_STATE::PES_UNKNOWN:
+            currentState = "Unknown";
+		break;
+        case PACKAGE_EXECUTION_STATE::PES_RUNNING:
+            currentState = "Running";
+		break;
+        case PACKAGE_EXECUTION_STATE::PES_SUSPENDING:
+            currentState = "Suspending";
+		break;
+        case PACKAGE_EXECUTION_STATE::PES_SUSPENDED:
+            currentState = "Suspended";
+		break;
+        case PACKAGE_EXECUTION_STATE::PES_TERMINATED:
+            currentState = "Terminated";
+		break;
+        default:
+            currentState = "Invalid State";
+		break;
+    }
+}
+
+#define ZENOVA_MSG 0xCDEF
 
 // Main code
 int wmain(int argumentsSize, wchar_t** arguments) {
@@ -49,7 +72,7 @@ int wmain(int argumentsSize, wchar_t** arguments) {
 
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+DirectX11 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Zenova", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 720, window_flags);
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(window, &wmInfo);
@@ -93,13 +116,18 @@ int wmain(int argumentsSize, wchar_t** arguments) {
 
     // Our state
     bool show_demo_window = true;
-    bool show_another_window = false;
+    bool launchMinecraft = false;
+    bool show_mods_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	//Initalize Launcher Stuff
 	if(!app) {
 		app = new AppUtils::AppDebugger(AppUtils::GetMinecraftPackageId());
+		app->setStateChangeCallback(StateChangeCallbackFunc);
+		StateChangeCallbackFunc(app->GetPackageExecutionState());
 	}
+	MSG messages;
+
 	//SetStateChangeCallback(Handler);
 
     // Main loop
@@ -111,8 +139,7 @@ int wmain(int argumentsSize, wchar_t** arguments) {
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
+        while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT)
                 done = true;
@@ -129,18 +156,22 @@ int wmain(int argumentsSize, wchar_t** arguments) {
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
+			ImGui::Begin("App Launching Stuff");                          // Create a window called "Hello, world!" and append into it.
+			if(ImGui::Button("Launch Minecraft"))
+				launchMinecraft = true;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+			ImGui::Text("State: %s", currentState.c_str());
+			if(PeekMessageA(&messages, NULL, ZENOVA_MSG, ZENOVA_MSG, PM_REMOVE))
+				ImGui::Text("Log: (%x: %p)", messages.message, messages.lParam);
+			ImGui::End();
+		}
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            if(ImGui::Button("Launch Minecraft"))
-				show_another_window = true;
-
+		{
+			static float f = 0.0f;
+			static int counter = 0;
+			ImGui::Begin("Tutorial Stuff");
+			ImGui::Checkbox("Demo Window", &show_demo_window);
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
@@ -153,10 +184,8 @@ int wmain(int argumentsSize, wchar_t** arguments) {
             ImGui::End();
         }
 
-        // 3. Show another simple window.
-        if (show_another_window) {
-			show_another_window = false;
-
+        if (launchMinecraft) {
+			launchMinecraft = false;
 			LaunchMinecraft(true);
         }
 
@@ -183,48 +212,6 @@ int wmain(int argumentsSize, wchar_t** arguments) {
 }
 
 // Launcher functions
-int Handler(int state) {
-	currentState = (PACKAGE_EXECUTION_STATE)state;
-	//update launcher button
-	return 0;
-}
-
-HRESULT launchAppxPackage(LPCWSTR packageFamilyName, PDWORD applicationId) {
-	HRESULT result = CoInitialize(nullptr);
-	if (SUCCEEDED(result)) {
-		{
-			CComPtr<IApplicationActivationManager> applicationActivationManager;
-			result = CoCreateInstance(CLSID_ApplicationActivationManager, NULL, CLSCTX_LOCAL_SERVER, IID_IApplicationActivationManager, (LPVOID*)&applicationActivationManager);
-			if (SUCCEEDED(result)) {
-				result = CoAllowSetForegroundWindow(applicationActivationManager, NULL);
-				if (SUCCEEDED(result)) {
-					result = applicationActivationManager->ActivateApplication(packageFamilyName, NULL, AO_NONE, applicationId);
-					if (SUCCEEDED(result)) {
-						std::wcout << applicationId << std::endl;
-						return S_OK;
-					}
-					else {
-						std::wcerr << L"Error in ActivateApplication 0x" << std::hex << result << std::endl;
-					}
-				}
-				else {
-					std::wcerr << L"Error in CoAllowSetForegroundWindow 0x" << std::hex << result << std::endl;
-				}
-			}
-			else {
-				std::wcerr << L"Error in CoCreateInstance 0x" << std::hex << result << std::endl;
-			}
-		}
-
-		CoUninitialize();
-	}
-	else {
-		std::wcerr << L"Error in CoInitialize 0x" << std::hex << result << std::endl;
-	}
-
-	return E_UNEXPECTED;
-}
-
 void LaunchMinecraft(bool forceRestart) {
 	HRESULT hresult = S_OK;
 
@@ -284,7 +271,7 @@ void LaunchMinecraft(bool forceRestart) {
 			//std::cout << "Sucessfully launched Minecraft with mods\n";
 		}
 
-		app->DisableDebugging();
+		//app->DisableDebugging();
 		hresult = app->GetHRESULT();
 		if(hresult != S_OK) {
 			//std::cout << "Could not disable debugging, HRESULT: " << hresult << std::endl;
@@ -298,51 +285,6 @@ void LaunchMinecraft(bool forceRestart) {
 	}
 
 	return;//  S_OK;
-}
-
-std::wstring GetMinecraftApplicationId() {
-	std::wstring appId;
-
-	ATL::CRegKey key, subKey;
-	LPTSTR szBuffer = new WCHAR[1024], szSubBuffer = new WCHAR[1024];
-	DWORD dwBufferLen = 1024, dwSubBufferLen = 1024;
-	DWORD index = 0;
-
-	LRESULT result = ERROR_SUCCESS;
-
-	result = key.Open(HKEY_CLASSES_ROOT, L"", KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE | KEY_READ);
-	if(result != ERROR_SUCCESS) return appId;
-
-	for(; key.EnumKey(index, szBuffer, &dwBufferLen, NULL) == ERROR_SUCCESS; dwBufferLen = 1024, index++) {
-		std::wstring keyName(szBuffer);
-		if(keyName.substr(0, 4) != L"AppX") continue;
-
-		result = subKey.Open(HKEY_CLASSES_ROOT, keyName.c_str(), KEY_QUERY_VALUE | KEY_READ);
-		if(result != ERROR_SUCCESS) continue;
-
-		dwSubBufferLen = 1024;
-		result = subKey.QueryStringValue(L"", szSubBuffer, &dwSubBufferLen);
-		if(result != ERROR_SUCCESS) continue;
-
-		std::wstring keyValue(szSubBuffer);
-		if(keyValue.find(MINECRAFT_DEFAULT_NAME) == keyValue.npos) continue;
-
-		dwSubBufferLen = 1024;
-		result = subKey.Open(HKEY_CLASSES_ROOT, (keyName + L"\\Application").c_str(), KEY_QUERY_VALUE | KEY_READ);
-		if(result != ERROR_SUCCESS) continue;
-
-		result = subKey.QueryStringValue(L"AppUserModelID", szSubBuffer, &dwSubBufferLen);
-		if(result != ERROR_SUCCESS) continue;
-
-		appId = szSubBuffer;
-
-		break;
-	}
-
-	subKey.Close();
-	key.Close();
-
-	return appId;
 }
 
 // Helper functions

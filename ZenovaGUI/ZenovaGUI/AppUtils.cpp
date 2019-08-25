@@ -101,7 +101,7 @@ HRESULT AppUtils::LaunchApplication(LPCWSTR packageFullName, PDWORD pdwProcessId
 		NULL,
 		CLSCTX_LOCAL_SERVER,
 		IID_IApplicationActivationManager,
-		(LPVOID*)& spAppActivationManager);
+		(LPVOID*)&spAppActivationManager);
 
 	if(!SUCCEEDED(result)) return result;
 
@@ -134,9 +134,9 @@ void AppUtils::StateChangeMonitor::initialize(const wchar_t* packageFullName, IP
 
 HRESULT __stdcall AppUtils::StateChangeMonitor::OnStateChanged(const wchar_t* packageFullName, PACKAGE_EXECUTION_STATE state) {
 	//showStateMessageBox(state);
-	if(this->callbackPtr) {
+	if(this->callbackPtr)
 		this->callbackPtr(state);
-	}
+
 	return S_OK;
 }
 

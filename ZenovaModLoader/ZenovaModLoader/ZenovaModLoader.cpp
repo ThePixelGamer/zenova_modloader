@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <ShObjIdl.h>
+#include <fstream>
 
 #include "AppUtils.h"
 #include "ModLoader.h"
@@ -24,7 +25,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	}
 
 	if(dwProcessId != 0 && SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))) {
-
 		std::wstring AppFullName = AppUtils::GetMinecraftPackageId();
 		AppUtils::AppDebugger app(AppFullName);
 
