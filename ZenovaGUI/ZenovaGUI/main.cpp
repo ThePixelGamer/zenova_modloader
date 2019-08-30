@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_syswm.h>
+#include <imgui_internal.h>
 
 AppUtils::AppDebugger* app;
 
@@ -32,7 +33,7 @@ void LaunchMinecraft(bool);
 void ShowLog(bool*);
 
 // Forward declarations of helper functions
-std::string GetClipboardText();
+char* GetClipboardText();
 bool CreateDeviceD3D(HWND);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
@@ -84,10 +85,8 @@ struct AppLog {
         va_list args;
         va_start(args, fmt);
         Buf.appendfv(fmt, args);
-        va_end(args);
-        for (int new_size = Buf.size(); old_size < new_size; old_size++)
-            if (Buf[old_size] == '\n')
-                LineOffsets.push_back(old_size + 1);
+		va_end(args);
+		LineOffsets.push_back(old_size); 
     }
 
     void Draw(const char* title, bool* p_open = NULL) {
@@ -123,42 +122,34 @@ struct AppLog {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         const char* buf = Buf.begin();
         const char* buf_end = Buf.end();
-        if (Filter.IsActive()) {
-            // In this example we don't use the clipper when Filter is enabled.
-            // This is because we don't have a random access on the result on our filter.
-            // A real application processing logs with ten of thousands of entries may want to store the result of search/filter.
-            // especially if the filtering function is not trivial (e.g. reg-exp).
-            for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
-            {
-                const char* line_start = buf + LineOffsets[line_no];
-                const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                if (Filter.PassFilter(line_start, line_end))
-                    ImGui::TextUnformatted(line_start, line_end);
-            }
-        }
-        else {
-            // The simplest and easy way to display the entire buffer:
-            //   ImGui::TextUnformatted(buf_begin, buf_end);
-            // And it'll just work. TextUnformatted() has specialization for large blob of text and will fast-forward to skip non-visible lines.
-            // Here we instead demonstrate using the clipper to only process lines that are within the visible area.
-            // If you have tens of thousands of items and their processing cost is non-negligible, coarse clipping them on your side is recommended.
-            // Using ImGuiListClipper requires A) random access into your data, and B) items all being the  same height,
-            // both of which we can handle since we an array pointing to the beginning of each line of text.
-            // When using the filter (in the block of code above) we don't have random access into the data to display anymore, which is why we don't use the clipper.
-            // Storing or skimming through the search result would make it possible (and would be recommended if you want to search through tens of thousands of entries)
-            ImGuiListClipper clipper;
-            clipper.Begin(LineOffsets.Size);
-            while (clipper.Step())
-            {
-                for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++)
-                {
-                    const char* line_start = buf + LineOffsets[line_no];
-                    const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                    ImGui::TextUnformatted(line_start, line_end);
-                }
-            }
-            clipper.End();
-        }
+		const char* line_start_prev = Buf.begin();
+		const char* line_end_prev = Buf.end();
+		for(int line_no = 0; line_no < LineOffsets.Size; line_no++) {
+			const char* line_start = buf + LineOffsets[line_no];
+			const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
+			const char* zenova_s = "[ZenovaLogger]";
+
+
+			if(line_no != 0) {
+				if(ImStristr(line_start, line_end, line_start_prev, line_end_prev)) {
+					goto ChangeThisLater;
+				}
+			}
+
+			if(ImStristr(line_start, line_end, zenova_s, zenova_s + (strlen(zenova_s) - 1))) {
+				if(Filter.IsActive()) {
+					if(Filter.PassFilter(line_start, line_end))
+						ImGui::TextUnformatted(line_start, line_end);
+				}
+				else {
+					ImGui::TextUnformatted(line_start, line_end);
+				}
+			}
+
+			ChangeThisLater:
+			line_start_prev = line_start;
+			line_end_prev = line_end;
+		}
         ImGui::PopStyleVar();
 
         if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
@@ -407,8 +398,9 @@ void ShowLog(bool* p_open) {
     {
 		SYSTEMTIME st;
 		GetLocalTime(&st);
-		log.AddLog("[%02d:%02d:%02d:%02d] [%s] '%s'\n",
-			st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, "info", GetClipboardText().c_str());
+		//log.AddLog("[%02d:%02d:%02d] [%s] %s\n",
+		//	st.wHour, st.wMinute, st.wSecond, "info", GetClipboardText()); add this back later
+		log.AddLog("%s\n", GetClipboardText());
     }
     ImGui::End();
 
@@ -417,32 +409,27 @@ void ShowLog(bool* p_open) {
 }
 
 // Helper functions
-std::string GetClipboardText() {
+char* GetClipboardText() {
 	// Try opening the clipboard
-	if(!OpenClipboard(nullptr)) {
-		std::cout << "OpenClipboard Failed" << std::endl;
-		return std::string();
-	}
-
-	// Get handle of clipboard object for ANSI text
-	HANDLE hData = GetClipboardData(CF_UNICODETEXT);
-	if (hData == nullptr) {
-		std::cout << "GetClipboardData Failed" << std::endl;
-		return std::string();
-	}
-
-	// Lock the handle to get the actual text pointer
-	char* pszText = static_cast<char*>(GlobalLock(hData));
-	if (pszText == nullptr) {
-		std::cout << "GlobalLock Failed" << std::endl;
-		return std::string();
-	}
-
-	std::string text(pszText); // Save text in a string class instance
-	GlobalUnlock(hData); // Release the lock
-	CloseClipboard(); // Release the clipboard
-
-	return text;
+	//if(!OpenClipboard(nullptr)) {
+	//	std::cout << "OpenClipboard Failed" << std::endl;
+	//	return (char*)"";
+	//}
+	//
+	//// Get handle of clipboard object for ANSI text
+	//HANDLE hData = GetClipboardData(CF_TEXT);
+	//if (hData) {
+	//	// Lock the handle to get the actual text pointer
+	//	char* pszText = static_cast<char*>(GlobalLock(hData));
+	//	if (pszText) {
+	//		GlobalUnlock(hData); // Release the lock
+	//		CloseClipboard(); // Release the clipboard
+	//		return pszText;
+	//	}
+	//}
+	//
+	//CloseClipboard(); // Release the clipboard
+	return (char*)"";
 }
 
 bool CreateDeviceD3D(HWND hWnd) {
