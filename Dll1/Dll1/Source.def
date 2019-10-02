@@ -1,0 +1,5 @@
+LIBRARY Dll1
+EXPORTS
+	SlideAddress
+	GetModuleBaseAddress
+	GetModuleSize

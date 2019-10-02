@@ -61,7 +61,7 @@ BOOL Initialize() {
 		// Get the path to the textures folder
 		std::wstring appData(szPath);
 		appData = appData.substr(0, appData.rfind(L"AC"));
-		appData += L"LocalState\\games\\com.mojang\\assets\\";
+		appData += L"LocalState\\games\\com.mojang\\";
 
 		MINECRAFT_LOCAL_PATH = appData;
 	}

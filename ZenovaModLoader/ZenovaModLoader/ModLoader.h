@@ -3,8 +3,7 @@
 
 #include <iostream>
 
-namespace ModLoader
-{
+namespace ModLoader {
 	/* Sets the group policy of a given file to "ALL APPLICATION PACKAGES" */
 	DWORD AdjustGroupPolicy(std::wstring wstrFilePath);
 

@@ -18,12 +18,17 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Hook\Hook.cpp">
+    <ClCompile Include="Hook\Zenova.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Hook\Hook.h">
+    <None Include="Source.def">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Hook\Zenova.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

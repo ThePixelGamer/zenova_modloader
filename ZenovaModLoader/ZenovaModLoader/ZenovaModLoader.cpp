@@ -2,15 +2,18 @@
 #include <ShObjIdl.h>
 #include <fstream>
 
-#include "AppUtils.h"
+#include "../../Utils/AppUtils.h"
+#include "../../Utils/ProcessUtils.h"
 #include "ModLoader.h"
-#include "ProcessUtils.h"
 
 #define IMPORT extern __declspec(dllimport)
 
 IMPORT int __argc;
 IMPORT char** __argv;
 //IMPORT wchar_t** __wargv;
+
+#define BUF_SIZE 256
+TCHAR szName[]=TEXT("Global\\PIDForDebugger");
 
 // Turning this into a normal Windows program hides the GUI
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
@@ -35,7 +38,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 
 		// Assume the game is suspended and inject mods
 		ModLoader::InjectMods(dwProcessId);
-
+		
 		// Resume the game
 		ProcessUtils::ResumeProcess(dwProcessId);
 

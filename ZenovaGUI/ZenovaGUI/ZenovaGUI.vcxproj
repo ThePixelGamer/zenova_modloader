@@ -136,7 +136,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AppUtils.cpp" />
+    <ClCompile Include="..\..\Utils\AppUtils.cpp" />
+    <ClCompile Include="..\..\Utils\ProcessUtils.cpp" />
+    <ClCompile Include="..\..\Utils\utils.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -144,14 +146,18 @@
     <ClCompile Include="imgui\imgui_impl_sdl.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ProcessUtils.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="ZenovaCommon.cpp" />
+    <ClCompile Include="ZenovaDebugger.cpp" />
+    <ClCompile Include="ZenovaLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppUtils.h" />
-    <ClInclude Include="ProcessUtils.h" />
+    <ClInclude Include="..\..\Utils\AppUtils.h" />
+    <ClInclude Include="..\..\Utils\ProcessUtils.h" />
+    <ClInclude Include="..\..\Utils\utils.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="ZenovaCommon.h" />
+    <ClInclude Include="ZenovaDebugger.h" />
+    <ClInclude Include="ZenovaLogger.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZenovaGUI.rc" />

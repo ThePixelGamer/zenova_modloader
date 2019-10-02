@@ -4,7 +4,7 @@
 #include <Shlwapi.h>
 #include <Sddl.h>
 #include "ModLoader.h"
-#include "utils.h"
+#include "../../Utils/utils.h"
 
 DWORD ModLoader::AdjustGroupPolicy(std::wstring wstrFilePath) {
 	PACL pOldDACL = NULL, pNewDACL = NULL;
@@ -53,19 +53,6 @@ Cleanup:
 BOOL ModLoader::InjectDLL(DWORD dwProcessId, std::wstring dllPath) {
 	BOOL status = TRUE;
 
-	/* Find the address of the LoadLibrary API */
-	HMODULE hLocKernel32 = GetModuleHandle(L"Kernel32");
-	if(hLocKernel32 == NULL) {
-		//if (Util::is_open()) Util::log(L"Could not get a handle on Kernel32 in the process (" + std::to_wstring(dwProcessId) + L"), HRESULT: " + std::to_wstring(GetLastError()));
-		return FALSE;
-	}
-
-	FARPROC hLocLoadLibrary = GetProcAddress(hLocKernel32, "LoadLibraryW");
-	if(hLocLoadLibrary == NULL) {
-		//if (Util::is_open()) Util::log(L"Could not find the locatin of LoadLibraryW in the process (" + std::to_wstring(dwProcessId) + L"), HRESULT: " + std::to_wstring(GetLastError()));
-		return FALSE;
-	}
-
 	/* Open the process with all access */
 	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessId);
 	if(hProc == NULL) {
@@ -76,7 +63,7 @@ BOOL ModLoader::InjectDLL(DWORD dwProcessId, std::wstring dllPath) {
 	/* Allocate memory to hold the path to the DLL File in the process's memory */
 	dllPath += L'\0';
 	SIZE_T dllPathSize = dllPath.size() * sizeof(wchar_t);
-	LPVOID hRemoteMem = VirtualAllocEx(hProc, NULL, dllPathSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	LPVOID hRemoteMem = VirtualAllocEx(hProc, NULL, dllPathSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	if(hRemoteMem == NULL) {
 		//if (Util::is_open()) Util::log(L"Could not allocate memory in the process(" + std::to_wstring(dwProcessId) + L"), HRESULT: " + std::to_wstring(GetLastError()));
 		return FALSE;
@@ -86,6 +73,19 @@ BOOL ModLoader::InjectDLL(DWORD dwProcessId, std::wstring dllPath) {
 	status = WriteProcessMemory(hProc, hRemoteMem, dllPath.c_str(), dllPathSize, NULL);
 	if(!status) {
 		//if (Util::is_open()) Util::log(L"Could not write memory in the process (" + std::to_wstring(dwProcessId) + L"), HRESULT: " + std::to_wstring(GetLastError()));
+		return FALSE;
+	}
+
+	/* Find the address of the LoadLibrary API */
+	HMODULE hLocKernel32 = GetModuleHandle(L"Kernel32");
+	if(hLocKernel32 == NULL) {
+		//if (Util::is_open()) Util::log(L"Could not get a handle on Kernel32 in the process (" + std::to_wstring(dwProcessId) + L"), HRESULT: " + std::to_wstring(GetLastError()));
+		return FALSE;
+	}
+
+	FARPROC hLocLoadLibrary = GetProcAddress(hLocKernel32, "LoadLibraryW");
+	if(hLocLoadLibrary == NULL) {
+		//if (Util::is_open()) Util::log(L"Could not find the locatin of LoadLibraryW in the process (" + std::to_wstring(dwProcessId) + L"), HRESULT: " + std::to_wstring(GetLastError()));
 		return FALSE;
 	}
 
