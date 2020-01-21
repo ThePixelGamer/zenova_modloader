@@ -13,7 +13,6 @@
 
 
 namespace ZenovaCommon {
-	extern ZenovaDebugger dbg;
 	extern ZenovaLogger logger;
 	extern std::string currentState;
 	extern bool done;

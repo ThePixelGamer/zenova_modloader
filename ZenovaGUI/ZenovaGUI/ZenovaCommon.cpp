@@ -1,7 +1,6 @@
 #include "ZenovaCommon.h"
 
 namespace ZenovaCommon {
-	ZenovaDebugger dbg;
 	ZenovaLogger logger;
 	std::string currentState = "Unknown";
 	bool done = false;

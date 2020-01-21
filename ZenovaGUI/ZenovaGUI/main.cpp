@@ -32,10 +32,12 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 void ShowLog(bool*);
 
+int EnterGUILoop();
+
 AppUtils::AppDebugger* app;
-	
+
 // Main code
-int wmain(int argumentsSize, wchar_t** arguments) {
+int main(int argumentsSize, char** arguments) {
 	CoInitialize(NULL); //to get "app" working
 
 	if(!app) {
@@ -46,6 +48,21 @@ int wmain(int argumentsSize, wchar_t** arguments) {
 		StateChangeCallbackFunc(app->GetPackageExecutionState());
 	}
 
+	int ret = 0;
+
+	if(strcmp(arguments[0], (Util::WSTRING_TO_STRING(Util::GetCurrentDirectory()) + "FastZenovaLaunch.exe").c_str()) == 0) {
+		LaunchMinecraft(true);
+	}
+	else {
+		ret = EnterGUILoop();
+	}
+
+	CoUninitialize();
+
+	return ret;
+}
+
+int EnterGUILoop() {
 	// Setup SDL
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
 		std::cout << "Error: " << SDL_GetError() << std::endl;
@@ -134,8 +151,6 @@ int wmain(int argumentsSize, wchar_t** arguments) {
 		g_pSwapChain->Present(1, 0); // Present with vsync
 		//g_pSwapChain->Present(0, 0); // Present without vsync
 	}
-	
-	CoUninitialize();
 
 	// Cleanup
 	ImGui_ImplDX11_Shutdown();
@@ -151,6 +166,8 @@ int wmain(int argumentsSize, wchar_t** arguments) {
 
 #define BUF_SIZE 256
 TCHAR szName[]=TEXT("Global\\PIDForDebugger");
+
+DWORD dwProcessId = 0;
 
 // Launcher functions
 void LaunchMinecraft(bool forceRestart) {
@@ -193,11 +210,14 @@ void LaunchMinecraft(bool forceRestart) {
 			CoUninitialize();
 			return;//  hresult;
 		}
-		
-		std::thread debugger(ZenovaDebuggerTest);
-		debugger.detach();
 
-		DWORD dwProcessId = 0;
+		typedef void (*ZD_Void)();
+		typedef void (*ZD_WString)(const std::wstring&);
+		typedef void (*ZD_DwordRef)(std::reference_wrapper<DWORD>);
+
+		//std::thread debugger((ZD_Void)(ZenovaDebugger));
+		//debugger.detach();
+
 		std::wstring ApplicationId = AppUtils::GetMinecraftApplicationId();
 		if(ApplicationId.length() == 0) return;// E_FAIL;
 		hresult = AppUtils::LaunchApplication(ApplicationId.c_str(), &dwProcessId);
@@ -214,8 +234,6 @@ void LaunchMinecraft(bool forceRestart) {
 			CoUninitialize();
 			return;//  hresult;
 		}
-
-		//Sleep(10 * 1000); //hac
 		
 		ZenovaCommon::logger.AddLog("%s\n", "Sucessfully launched Minecraft with mods");
 

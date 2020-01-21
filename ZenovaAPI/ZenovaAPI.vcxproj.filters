@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\bedrock">
+      <UniqueIdentifier>{3e89052a-3758-4df0-98eb-f42cddef19d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\bedrock">
+      <UniqueIdentifier>{a73944f3-5533-4063-ae0a-b1d3ce5ea660}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\zenova">
+      <UniqueIdentifier>{b70273cc-9283-4923-b0c3-51d0c1fba352}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\zenova">
+      <UniqueIdentifier>{7e5b1e0f-de5f-4d74-9f0d-d06fbfbb08d6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bedrock\Item.cpp">
+      <Filter>Source Files\bedrock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bedrock\ItemRegistry.cpp">
+      <Filter>Source Files\bedrock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zenova\Zenova.cpp">
+      <Filter>Source Files\zenova</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zenova\ZenovaCore.cpp">
+      <Filter>Source Files\zenova</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zenova\ZenovaMod.cpp">
+      <Filter>Source Files\zenova</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bedrock\BlockTypeRegistry.cpp">
+      <Filter>Source Files\bedrock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bedrock\BlockLegacy.cpp">
+      <Filter>Source Files\bedrock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bedrock\Block.cpp">
+      <Filter>Source Files\bedrock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bedrock\Util.cpp">
+      <Filter>Source Files\bedrock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExampleMod\ExampleBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExampleMod\ExampleBlockTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExampleMod\ExampleItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExampleMod\ExampleItems.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\bedrock\BlockLegacy.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\ItemRegistry.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\Material.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Zenova.h">
+      <Filter>Header Files\zenova</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ZenovaCore.h">
+      <Filter>Header Files\zenova</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ZenovaMod.h">
+      <Filter>Header Files\zenova</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MinHook.h">
+      <Filter>Header Files\zenova</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\BlockTypeRegistry.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\Ptr.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\Item.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\Actor.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\Block.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\BlockPos.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\BlockSource.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\bedrock\Util.h">
+      <Filter>Header Files\bedrock</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ExampleMod\ExampleBlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ExampleMod\ExampleBlockTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ExampleMod\ExampleItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ExampleMod\ExampleItems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

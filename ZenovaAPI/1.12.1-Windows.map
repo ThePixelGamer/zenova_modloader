@@ -1,0 +1,6 @@
+#Vtables
+BlockLegacy 2462138
+
+#Item
+Item::Item(const char&, int) 
+Item::setMaxStackSize(unsigned char)

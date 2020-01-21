@@ -15,6 +15,25 @@ IMPORT char** __argv;
 #define BUF_SIZE 256
 TCHAR szName[]=TEXT("Global\\PIDForDebugger");
 
+void launchProcess(std::string app, std::string arg) {
+	// Prepare handles.
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi; // The function returns this
+	ZeroMemory( &si, sizeof(si) );
+	si.cb = sizeof(si);
+	ZeroMemory( &pi, sizeof(pi) );
+
+	// Start the child process.
+	if(!CreateProcessA(app.c_str(), const_cast<char*>(arg.c_str()), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+		printf("CreateProcess failed (%d).\n", GetLastError());
+		throw std::exception("Could not create child process");
+	}
+	
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+}
+
 // Turning this into a normal Windows program hides the GUI
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 	DWORD dwProcessId = 0;
@@ -35,6 +54,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			CoUninitialize();
 			return E_FAIL;
 		}
+		
+		launchProcess("C:\\Windows\\System32\\vsjitdebugger.exe", std::string(" -p " + std::to_string(dwProcessId)));
 
 		// Assume the game is suspended and inject mods
 		ModLoader::InjectMods(dwProcessId);
