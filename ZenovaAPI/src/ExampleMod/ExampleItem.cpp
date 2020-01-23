@@ -14,7 +14,7 @@
 
 ExampleItem::ExampleItem(const std::string& name, short id) : Item(name, id) {
 	//Replace our vtable with calls to the original vtable, but keep the ones we've overriden
-	CompareAndReplace<Item>(*(uintptr_t**)this, (uintptr_t*)SlideAddress(0x244A108));
+	CompareAndReplace<Item>(reinterpret_cast<uintptr_t*>(this), (uintptr_t*)SlideAddress(0x244A108));
 	setCategory(CreativeItemCategory::TOOLS);
 	setMaxStackSize(16);
 }
@@ -26,7 +26,7 @@ void ExampleItem::placeHouse(BlockSource* source, const BlockPos& pos) const {
 	};
 
 	auto get = [&](const std::vector<WeakPtr<BlockLegacy>>& blockPtr, const BlockPos& blockpos) {
-		for(int i = 0; i < blockPtr.size(); i++) {
+		for(size_t i = 0; i < blockPtr.size(); i++) {
 			if((blockPtr[i]->blockID == (((const Block & (*)(const BlockSource*, const BlockPos&))SlideAddress(0x1333650))(source, blockpos)).legacyBlock->blockID))
 				return true;
 		}
@@ -46,8 +46,11 @@ void ExampleItem::placeHouse(BlockSource* source, const BlockPos& pos) const {
 					if((x == pos.x - 3) || (x == endx) || (y == pos.y - 3) || (y == endy) || (z == pos.z - 3) || (z == endz)) {
 						update = 2;
 					}
+					else {
+						update = 0;
+					}
+
 					set(gold, current, update);
-					update = 0;
 				}
 			}
 		}

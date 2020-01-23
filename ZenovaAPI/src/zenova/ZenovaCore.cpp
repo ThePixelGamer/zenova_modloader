@@ -1,7 +1,7 @@
 #include "ZenovaCore.h"
 #include <TlHelp32.h>
 
-extern uintptr_t BaseAddress(0);
+extern uint8_t* BaseAddress(0);
 
 template<typename T, typename... Targs>
 T Call(const char* func, Targs... args) {
@@ -14,24 +14,25 @@ T Call(uintptr_t func, Targs... args) {
 }
 
 uintptr_t GetAddress(uintptr_t result) {
-	return result - BaseAddress;
+	return result - reinterpret_cast<uintptr_t>(BaseAddress);
 }
 
-uintptr_t SlideAddress(uintptr_t offset) {
+void* SlideAddress(size_t offset) {
 	return BaseAddress + offset;
 }
 
-void DebugString(std::string name, const char* str) {
-	OutputDebugString(std::string("[" + name + "] " + str).c_str());
+void DebugString(std::string name, const std::string& str) {
+	OutputDebugStringA(std::string("[" + name + "] " + str).c_str());
 }
 
-void print(const char* str) {
-	DebugString("test", str);
+void print(const std::string& str) {
+	DebugString("ZenovaAPI", str);
 }
 
-uintptr_t GetModuleBaseAddress(const char* modName) {
+//remove the reliance on microsoft's unicode setting
+uint8_t* GetModuleBaseAddress(const char* modName) {
 	DWORD procId = GetCurrentProcessId();
-	uintptr_t modBaseAddr = 0;
+	uint8_t* modBaseAddr = 0;
 	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
 	if(hSnap != INVALID_HANDLE_VALUE) {
 		MODULEENTRY32 modEntry;
@@ -39,7 +40,7 @@ uintptr_t GetModuleBaseAddress(const char* modName) {
 		if(Module32First(hSnap, &modEntry)) {
 			do {
 				if(!_stricmp(modEntry.szModule, modName)) {
-					modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+					modBaseAddr = modEntry.modBaseAddr;
 					break;
 				}
 			} while(Module32Next(hSnap, &modEntry));
@@ -49,9 +50,9 @@ uintptr_t GetModuleBaseAddress(const char* modName) {
 	return modBaseAddr;
 }
 
-uintptr_t GetModuleBaseAddress(const wchar_t* modName) {
+uint8_t* GetModuleBaseAddress(const wchar_t* modName) {
 	DWORD procId = GetCurrentProcessId();
-	uintptr_t modBaseAddr = 0;
+	uint8_t* modBaseAddr = 0;
 	HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
 	if(hSnap != INVALID_HANDLE_VALUE) {
 		MODULEENTRY32W modEntry;
@@ -59,7 +60,7 @@ uintptr_t GetModuleBaseAddress(const wchar_t* modName) {
 		if(Module32FirstW(hSnap, &modEntry)) {
 			do {
 				if(!_wcsicmp(modEntry.szModule, modName)) {
-					modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+					modBaseAddr = modEntry.modBaseAddr;
 					break;
 				}
 			} while(Module32NextW(hSnap, &modEntry));

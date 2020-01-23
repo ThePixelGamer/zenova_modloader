@@ -1,9 +1,9 @@
 #include "bedrock/Util.h"
 
-std::string Util::toLower(std::string const&) {
-
+std::string Util::toLower(const std::string&) {
+	return "";
 }
 
-std::string Util::toUpper(std::string const&) {
-
+std::string Util::toUpper(const std::string&) {
+	return "";
 }

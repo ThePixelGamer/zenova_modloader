@@ -1,12 +1,9 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 
-#include "inc/Zenova.h"
+#include "Zenova.h"
 
 #define DLL_API __declspec(dllexport)
-
-//Will be in a Zenova Header
-
 
 class ExampleMod : public ZenovaMod {
 public:

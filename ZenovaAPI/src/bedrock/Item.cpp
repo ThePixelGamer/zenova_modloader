@@ -61,6 +61,10 @@ Item& Item::setAllowOffhand(bool boolean) {
 	return ((Item& (*)(Item*, bool))SlideAddress(0x114F230))(this, boolean);
 }
 
+const TextureUVCoordinateSet& Item::getIcon(int x, int y, bool b) const { 
+	return ((TextureUVCoordinateSet& (*)(int, int, bool))SlideAddress(0x0))(x, y, b); 
+}
+
 bool Item::_useOn(ItemInstance& item, Actor& actor, BlockPos blockpos, unsigned char uc, float f1, float f2, float f3) const { 
 	return ((bool (*)(const Item*, ItemInstance&, Actor&, BlockPos, unsigned char, float, float, float))SlideAddress(0x114E770))(this, item, actor, blockpos, uc, f1, f2, f3); 
 }

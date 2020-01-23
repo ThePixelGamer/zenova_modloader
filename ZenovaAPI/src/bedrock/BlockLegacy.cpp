@@ -7,16 +7,16 @@ BlockLegacy::BlockLegacy(const std::string& name, int id, const Material& mat) {
 	((void (*)(BlockLegacy*, const std::string&, int, const Material&))SlideAddress(0x1241660))(this, name, id, mat);
 }
 
-BlockLegacy& BlockLegacy::setCategory(CreativeItemCategory) {
-
+BlockLegacy& BlockLegacy::setCategory(CreativeItemCategory category) {
+	return ((BlockLegacy& (*)(CreativeItemCategory))SlideAddress(0x0))(category);
 }
 
 WeakPtr<BlockLegacy> BlockLegacy::createWeakPtr() {
-
+	return ((WeakPtr<BlockLegacy> (*)())SlideAddress(0x0))();
 }
 
-std::string const& BlockLegacy::getRawNameId() {
-
+const std::string& BlockLegacy::getRawNameId() {
+	return ((const std::string& (*)())SlideAddress(0x0))();
 }
 
 BlockLegacy::~BlockLegacy() {}

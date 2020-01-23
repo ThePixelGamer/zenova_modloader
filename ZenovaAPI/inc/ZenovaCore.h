@@ -15,37 +15,36 @@ T Call(const char* func, Targs... args);
 template<typename T, typename... Targs>
 T Call(uintptr_t func, Targs... args);
 
-void DebugString(std::string name, const char* str);
-void print(const char*);
+void DebugString(std::string name, const std::string& str);
+void print(const std::string&);
 uintptr_t GetAddress(uintptr_t result);
-uintptr_t SlideAddress(uintptr_t offset);
-uintptr_t GetModuleBaseAddress(const char* modName);
-uintptr_t GetModuleBaseAddress(const wchar_t* modName);
+void* SlideAddress(uintptr_t offset);
+uint8_t* GetModuleBaseAddress(const char* modName);
+uint8_t* GetModuleBaseAddress(const wchar_t* modName);
 DWORD GetModuleSize(DWORD, const char*);
 
 uintptr_t GetSizeOfVtable(uintptr_t**);
 
+//TODO: Handle cases where the user implements the first virtual function
 template<typename T>
 __declspec(noinline) bool CompareAndReplace(uintptr_t* vtable, uintptr_t* copyVtable) {
 	if(vtable[0] != copyVtable[0]) { //prevent from running more than once
-		uintptr_t size = GetSizeOfVtable((uintptr_t**)copyVtable); //should return 111 w/ the original Item vtable
+		uintptr_t size = GetSizeOfVtable(reinterpret_cast<uintptr_t**>(copyVtable)); //should return 111 w/ the original Item vtable
 		if(size == -1) return false;
 		
-		T* classPtr = new T;
-		uintptr_t* tVtable = *(uintptr_t**)classPtr;
+		std::shared_ptr<T> classPtr = std::make_shared<T>();
+		uintptr_t* tVtable = *reinterpret_cast<uintptr_t**>(classPtr.get());
 
-		DWORD oldProt;
+		DWORD oldProt, unused;
 		VirtualProtect(vtable, size, PAGE_EXECUTE_READWRITE, &oldProt);
 
-		for(uintptr_t i = 0; i < size; i++) {
+		for(size_t i = 0; i < size; i++) {
 			if(vtable[i] == tVtable[i])
 				vtable[i] = copyVtable[i];
 		}
 		
-		DWORD temp;
-		VirtualProtect(vtable, size, oldProt, &temp);
+		VirtualProtect(vtable, size, oldProt, &unused);
 
-		delete classPtr;
 		return true;
 	}
 	
