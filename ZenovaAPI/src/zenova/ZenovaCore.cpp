@@ -21,14 +21,6 @@ void* SlideAddress(size_t offset) {
 	return BaseAddress + offset;
 }
 
-void DebugString(std::string name, const std::string& str) {
-	OutputDebugStringA(std::string("[" + name + "] " + str).c_str());
-}
-
-void print(const std::string& str) {
-	DebugString("ZenovaAPI", str);
-}
-
 //remove the reliance on microsoft's unicode setting
 uint8_t* GetModuleBaseAddress(const char* modName) {
 	DWORD procId = GetCurrentProcessId();

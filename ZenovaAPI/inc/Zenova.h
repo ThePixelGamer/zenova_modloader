@@ -72,11 +72,21 @@ using i64 = int64_t;
 namespace Zenova {
 	using exception = std::runtime_error;
 	
+	class Console {
+		FILE* console = nullptr;
+
+	public:
+		Console();
+		~Console();
+
+		void Print(const std::string& name, const std::string& message);
+	};
+
 	class StorageResolver {
 	public:
-		std::string_view minecraft_path_str;
-		std::wstring_view minecraft_path_wstr;
-		std::unordered_map<std::wstring, std::wstring> mirror_directory;
+		static std::string_view minecraft_path_str;
+		static std::wstring_view minecraft_path_wstr;
+		static std::unordered_map<std::wstring, std::wstring> mirror_directory;
 
 		StorageResolver();
 		StorageResolver(const std::wstring& directory, const std::wstring& mirror);
@@ -110,8 +120,6 @@ namespace Zenova {
 		virtual bool CreateHook(const std::string& module, const std::string& function, void* funcJump, void** funcTrampoline);
 		virtual void CreateFileA(const std::string& path);
 		//createdir
-
-		static StorageResolver storage;
 	};
 
 	class Windows : public OS {
@@ -142,13 +150,6 @@ namespace Zenova {
 
 
 
-	class Console {
-		FILE* console = nullptr;
-
-	public:
-		Console();
-		~Console();
-	};
 
 	
 

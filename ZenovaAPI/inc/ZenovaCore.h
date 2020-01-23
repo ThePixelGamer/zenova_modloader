@@ -15,10 +15,8 @@ T Call(const char* func, Targs... args);
 template<typename T, typename... Targs>
 T Call(uintptr_t func, Targs... args);
 
-void DebugString(std::string name, const std::string& str);
-void print(const std::string&);
 uintptr_t GetAddress(uintptr_t result);
-void* SlideAddress(uintptr_t offset);
+void* SlideAddress(size_t offset);
 uint8_t* GetModuleBaseAddress(const char* modName);
 uint8_t* GetModuleBaseAddress(const wchar_t* modName);
 DWORD GetModuleSize(DWORD, const char*);

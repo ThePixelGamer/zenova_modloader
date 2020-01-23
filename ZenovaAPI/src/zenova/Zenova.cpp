@@ -38,6 +38,20 @@ namespace Zenova {
 		}
 	}
 
+	void Console::Print(const std::string& name, const std::string& message) {
+		std::string str("[" + name + "] " + message);
+
+		OutputDebugStringA(str.c_str());
+
+		if(console) {
+			std::cout << str << std::endl;
+		}
+	}
+
+	std::string_view StorageResolver::minecraft_path_str;
+	std::wstring_view StorageResolver::minecraft_path_wstr;
+	std::unordered_map<std::wstring, std::wstring> StorageResolver::mirror_directory;
+
 	StorageResolver::StorageResolver() {
 		std::wstring szPathW;
 		if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathW.data()))) {
@@ -170,7 +184,7 @@ namespace Zenova {
 		std::wstring_view filePath(lpFileName);
 	
 		// Check if it's accessing resources; this method should work in all future updates
-		if(filePath.find(storage.minecraft_path_wstr) != filePath.npos) {
+		if(filePath.find(Zenova::StorageResolver::minecraft_path_wstr) != filePath.npos) {
 			std::wcout << "File: " << filePath << "\n";
 			std::cout << "{ " << WinAPI::getAccessRightString(dwDesiredAccess) << ", " 
 				<< WinAPI::getShareRightString(dwShareMode) <<  ", "
@@ -195,7 +209,7 @@ namespace Zenova {
 		std::wcout << filePath << std::endl;
 
 		// Check if it's accessing resources; this method should work in all future updates
-		if(filePath.find(storage.minecraft_path_wstr) != filePath.npos) {
+		if(filePath.find(Zenova::StorageResolver::minecraft_path_wstr) != filePath.npos) {
 			std::wstring newPath(L"D:/minecraftWorlds/");
 			std::wstring newDir(newPath);
 			std::wstring_view strToFind(L"/minecraftWorlds/");
@@ -219,7 +233,7 @@ namespace Zenova {
 		std::cout << filePath << std::endl;
 
 		// Check if it's accessing resources; this method should work in all future updates
-		if(filePath.find(storage.minecraft_path_str) != filePath.npos) {
+		if(filePath.find(Zenova::StorageResolver::minecraft_path_str) != filePath.npos) {
 			std::string newPath("D:/minecraftWorlds/");
 			std::string newDir(newPath);
 			std::string strToFind("/minecraftWorlds/");

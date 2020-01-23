@@ -76,11 +76,12 @@ void setupHooks(const std::shared_ptr<Zenova::OS>& os) {
 	//CreateHook((void*) SlideAddress(0x008F060), (void*) &init, (void**) &_init); //ClientInstance::init()
 }
 
-Zenova::StorageResolver Zenova::OS::storage(L"minecraftWorlds/", L"D:/MinecraftBedrock/Worlds");
 
 DWORD __stdcall ZenovaStart(void* dllHandle) {
-	print("Zenova Started\n");
-	print("Minecraft at: " + Zenova::Util::to_hex_string(BaseAddress));
+	Zenova::Console console;
+
+	console.Print("ZenovaAPI", "Zenova Started\n");
+	console.Print("ZenovaAPI", "Minecraft at: " + Zenova::Util::to_hex_string(BaseAddress) + "\n");
 	
 	//determine the os we're running on
 #ifdef WIN32
@@ -88,17 +89,17 @@ DWORD __stdcall ZenovaStart(void* dllHandle) {
 #elif __ANDROID__
 	std::shared_ptr<Zenova::OS> os = std::make_shared<Zenova::Linux>();
 #endif
+	
+	Zenova::StorageResolver storage(L"minecraftWorlds/", L"D:/MinecraftBedrock/Worlds");
 
 	setupHooks(os);
-
-	Zenova::Console console;
 
 	//HMODULE module = LoadLibraryA();
 
 	bool run = true;
 	while(run) {} //maybe do something with this? /shrug
 
-	print("Zenova Stopped\n");
+	console.Print("ZenovaAPI", "Zenova Stopped\n");
 	return 0;
 }
 
