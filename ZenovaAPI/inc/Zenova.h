@@ -24,6 +24,7 @@
 #endif
 
 #include <vector>
+#include <array>
 #include <map>
 #include <string>
 #include <iostream>
@@ -115,6 +116,8 @@ namespace Zenova {
 
 	public:
 		OSType type;
+
+		std::string OSTypeToString(const OSType& type);
 
 		virtual void* FindAddress(const std::string& function);
 		virtual void* FindAddress(const std::string& module, const std::string& function) = 0;

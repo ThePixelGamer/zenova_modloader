@@ -50,10 +50,13 @@ namespace Zenova {
 	std::unordered_map<std::wstring, std::wstring> StorageResolver::mirror_directory;
 
 	StorageResolver::StorageResolver() {
-		std::wstring szPathW;
+		//will have to change this later to meet 1607 expectations of really long filepaths
+		std::array<wchar_t, 1000> szPathW;
 		if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathW.data()))) {
 			// Get the path to the textures folder
-			std::wstring appData(szPathW.substr(0, szPathW.rfind(L"AC")) + L"LocalState/games/com.mojang/");
+			std::wstring_view szPathView(szPathW.data());
+			std::wstring appData(szPathView.substr(0, szPathView.rfind(L"AC")));
+			appData += L"LocalState/games/com.mojang/";
 
 			//Change all the trailing backslashes into forward slash
 			std::wstring_view replaced = L"\\";
@@ -68,11 +71,13 @@ namespace Zenova {
 
 			minecraft_path_wstr = appData;
 		}
-
-		std::string szPath;
-		if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPath.data()))) {
+		
+		std::array<char, MAX_PATH> szPathA;
+		if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathA.data()))) {
 			// Get the path to the textures folder
-			std::string appData(szPath.substr(0, szPath.rfind("AC")) + "LocalState/games/com.mojang/");
+			std::string_view szPathView(szPathA.data());
+			std::string appData(szPathView.substr(0, szPathView.rfind("AC")));
+			appData += "LocalState/games/com.mojang/";
 
 			//Change all the trailing backslashes into forward slash
 			std::string_view replaced = "\\";
@@ -92,8 +97,7 @@ namespace Zenova {
 	StorageResolver::StorageResolver(const std::wstring& directory, const std::wstring& mirror) : StorageResolver() {
 		addMirrorDirectory(directory, mirror);
 	}
-
-	StorageResolver::StorageResolver(const std::vector<std::wstring>& directories, const std::vector<std::wstring>& mirrors) : StorageResolver() {
+		StorageResolver::StorageResolver(const std::vector<std::wstring>& directories, const std::vector<std::wstring>& mirrors) : StorageResolver() {
 		addMirrorDirectory(directories, mirrors);
 	}
 
@@ -109,7 +113,21 @@ namespace Zenova {
 	}
 
 	OS::OS(OSType os) : type(os) {
-		Console::Print("ZenovaAPI", "Zenova Started\n");
+		Console::Print("ZenovaAPI", "Using " + OSTypeToString(os) + " Preset\n");
+	}
+	
+	std::string OS::OSTypeToString(const OSType& type) {
+		switch(type) {
+			case OSType::Windows: {
+				return "Windows";
+			}
+			case OSType::Linux: {
+				return "Linux";
+			}
+			default: {
+				return "Unknown";
+			}
+		}
 	}
 
 	void* OS::FindAddress(const std::string& function) {
@@ -386,6 +404,8 @@ namespace Zenova {
 	#elif __ANDROID__
 		std::shared_ptr<OS> os = std::make_shared<Linux>();
 	#endif
+
+		DebugBreak();
 		
 		StorageResolver storage(L"minecraftWorlds/", L"D:/MinecraftBedrock/Worlds");
 		setupHooks(os);
