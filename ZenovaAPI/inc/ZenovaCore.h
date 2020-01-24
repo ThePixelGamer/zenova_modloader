@@ -17,7 +17,6 @@ T Call(uintptr_t func, Targs... args);
 
 uintptr_t GetAddress(uintptr_t result);
 void* SlideAddress(size_t offset);
-uint8_t* GetModuleBaseAddress(const char* modName);
 uint8_t* GetModuleBaseAddress(const wchar_t* modName);
 DWORD GetModuleSize(DWORD, const char*);
 

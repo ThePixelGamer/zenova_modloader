@@ -42,10 +42,7 @@ namespace Zenova {
 		std::string str("[" + name + "] " + message);
 
 		OutputDebugStringA(str.c_str());
-
-		if(console) {
-			std::cout << str << std::endl;
-		}
+		std::cout << str << std::flush;
 	}
 
 	std::string_view StorageResolver::minecraft_path_str;
@@ -111,7 +108,9 @@ namespace Zenova {
 		return true;
 	}
 
-	OS::OS(OSType os) : type(os) {}
+	OS::OS(OSType os) : type(os) {
+		Console::Print("ZenovaAPI", "Zenova Started\n");
+	}
 
 	void* OS::FindAddress(const std::string& function) {
 		//todo: setup a dictionary for file input
@@ -334,5 +333,69 @@ namespace Zenova {
 					return std::to_string(dwFlagsAndAttributes);
 			}
 		}
+	}
+
+	//Basically all the bare minimum hooks to get this thing running
+	void setupHooks(const std::shared_ptr<Zenova::OS>& os) {
+		switch(os->type) {
+			case Zenova::OSType::Windows: {
+				os->CreateHook("KernelBase.dll", "CreateFileW", (void*) &Zenova::Windows::CreateFileW, (void**) &pfnCreateFileW);
+				os->CreateHook("KernelBase.dll", "CreateDirectoryW", (void*) &Zenova::Windows::CreateDirectoryW, (void**) &pfnCreateDirectoryW);
+				os->CreateHook("KernelBase.dll", "CreateDirectoryA", (void*) &Zenova::Windows::CreateDirectoryA, (void**) &pfnCreateDirectoryA);
+			} break;
+		}
+		//uintptr_t** vtable = (uintptr_t**)SlideAddress(0x2460D70) + 1; //to avoid calling the virtual deconstructor
+		//CreateHook((void*) SlideAddress(0x11848A0), (void*) &registerItems, (void**) &_registerItems); //VanillaItems::registerItems(bool)
+		//CreateHook((void*) SlideAddress(0x1193AF0), (void*) &initCreativeItemsCallback, (void**) &_initCreativeItemsCallback); //VanillaItems::initCreativeItemsCallback(ActorInfoRegistry*, BlockDefinitionGroup*, bool)
+		//os->CreateHook((void*) SlideAddress(0x118F7F0), (void*) &initClientData, (void**) &_initClientData); //VanillaItems::initClientData()
+		//CreateHook((void*) SlideAddress(0x008F060), (void*) &init, (void**) &_init); //ClientInstance::init()
+	}
+	
+	namespace Util {
+		uint8_t* GetModuleBaseAddress(const char* modName) {
+			DWORD procId = GetCurrentProcessId();
+			uint8_t* modBaseAddr = 0;
+			HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
+			if(hSnap != INVALID_HANDLE_VALUE) {
+				tagMODULEENTRY32 modEntry;
+				modEntry.dwSize = sizeof(modEntry);
+				if(Module32First(hSnap, &modEntry)) {
+					do {
+						if(!_stricmp(modEntry.szModule, modName)) {
+							modBaseAddr = modEntry.modBaseAddr;
+							break;
+						}
+					} while(Module32Next(hSnap, &modEntry));
+				}
+			}
+			CloseHandle(hSnap);
+			return modBaseAddr;
+		}
+	}
+
+	DWORD __stdcall Start(void* dllHandle) {
+		BaseAddress = Util::GetModuleBaseAddress("Minecraft.Windows.exe");
+		Console console;
+
+		Console::Print("ZenovaAPI", "Zenova Started\n");
+		Console::Print("ZenovaAPI", "Minecraft at: " + Util::to_hex_string(reinterpret_cast<uintptr_t>(BaseAddress)) + "\n");
+	
+		//determine the os we're running on
+	#ifdef WIN32
+		std::shared_ptr<OS> os = std::make_shared<Windows>(dllHandle);
+	#elif __ANDROID__
+		std::shared_ptr<OS> os = std::make_shared<Linux>();
+	#endif
+		
+		StorageResolver storage(L"minecraftWorlds/", L"D:/MinecraftBedrock/Worlds");
+		setupHooks(os);
+
+		//HMODULE module = LoadLibraryA();
+
+		bool run = true;
+		while(run) {} //maybe do something with this? /shrug
+
+		Console::Print("ZenovaAPI", "Zenova Stopped\n");
+		return 0;
 	}
 }

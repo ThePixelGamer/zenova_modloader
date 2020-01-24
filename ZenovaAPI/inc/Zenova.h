@@ -1,9 +1,10 @@
 #pragma once
 
 //MSVC uses WIN32, if it's something else in other compilers let me know or make a PR
-#ifdef WIN32
+#ifdef _WINDOWS
 	#include <Windows.h>
 	#include <Shlobj.h>
+	#include <TlHelp32.h>
 #elif
 	using BOOL = bool;
 	using DWORD = unsigned long;
@@ -68,6 +69,7 @@ using i16 = int16_t;
 using i32 = int32_t;
 using i64 = int64_t;
 
+extern uint8_t* BaseAddress;
 
 namespace Zenova {
 	using exception = std::runtime_error;
@@ -79,7 +81,7 @@ namespace Zenova {
 		Console();
 		~Console();
 
-		void Print(const std::string& name, const std::string& message);
+		static void Print(const std::string& name, const std::string& message);
 	};
 
 	class StorageResolver {
@@ -136,7 +138,6 @@ namespace Zenova {
 		static HANDLE __stdcall CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 		static HANDLE __stdcall CreateDirectoryW(LPCWSTR lpFileName, LPSECURITY_ATTRIBUTES lpSecurityAttributes);
 		static HANDLE __stdcall CreateDirectoryA(LPCSTR lpFileName, LPSECURITY_ATTRIBUTES lpSecurityAttributes);
-
 	};
 
 	class Linux : public OS {
@@ -148,11 +149,6 @@ namespace Zenova {
 		virtual bool CreateHook(void* address, void* funcJump, void** funcTrampoline);
 	};
 
-
-
-
-	
-
 	namespace Util {
 		template<typename T>
 		std::string to_hex_string(T num) {
@@ -160,6 +156,8 @@ namespace Zenova {
 			stream << "0x" << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << num;
 			return stream.str();
 		}
+
+		uint8_t* GetModuleBaseAddress(const char* modName);
 	}
 
 	namespace WinAPI {
@@ -168,4 +166,6 @@ namespace Zenova {
 		std::string getCreationDispositionString(const DWORD& dwCreationDisposition);
 		std::string getFlagsAndAttributesString(const DWORD& dwFlagsAndAttributes);
 	}
+
+	DWORD __stdcall Start(void* dllHandle);
 }
