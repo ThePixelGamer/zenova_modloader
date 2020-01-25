@@ -9,7 +9,7 @@
 //}
 
 namespace Zenova {
-	Console::Console() {
+	Console::Console(const std::string& t_name) : name(t_name) {
 		if(!AllocConsole()) {
 			return;
 		}
@@ -38,21 +38,39 @@ namespace Zenova {
 		}
 	}
 
-	void Console::Print(const std::string& name, const std::string& message) {
-		std::string str("[" + name + "] " + message);
+	void Console::Log(const std::string& message) {
+		Console::Log(name, message);
+	}
+
+	void Console::Log(const std::wstring& message) {
+		std::wstringstream str2wstr;
+		str2wstr << name.c_str();
+		Console::Log(str2wstr.str(), message);
+	}
+
+	void Console::Log(const std::string& name, const std::string& message) {
+		std::string str("[" + name + "] " + message + "\n");
 
 		OutputDebugStringA(str.c_str());
 		std::cout << str << std::flush;
 	}
 
-	std::string_view StorageResolver::minecraft_path_str;
-	std::wstring_view StorageResolver::minecraft_path_wstr;
+	void Console::Log(const std::wstring& name, const std::wstring& message) {
+		std::wstring str(L"[" + name + L"] " + message + L"\n");
+
+		OutputDebugStringW(str.c_str());
+		std::wcout << str << std::flush;
+	}
+
+	std::string StorageResolver::minecraft_path_str;
+	std::wstring StorageResolver::minecraft_path_wstr;
 	std::unordered_map<std::wstring, std::wstring> StorageResolver::mirror_directory;
 
 	StorageResolver::StorageResolver() {
 		//will have to change this later to meet 1607 expectations of really long filepaths
 		std::array<wchar_t, 1000> szPathW;
-		if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathW.data()))) {
+		HRESULT code = SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathW.data());
+		if(SUCCEEDED(code)) {
 			// Get the path to the textures folder
 			std::wstring_view szPathView(szPathW.data());
 			std::wstring appData(szPathView.substr(0, szPathView.rfind(L"AC")));
@@ -70,10 +88,17 @@ namespace Zenova {
 			appData.replace(appData.find(replaced), replaced.length(), L"Microsoft.MinecraftUWP");
 
 			minecraft_path_wstr = appData;
+			Console::Log(L"StorageResolver::PathW", minecraft_path_wstr);
+		}
+		else {
+			_com_error err(code);
+			LPCTSTR errMsg = err.ErrorMessage();
+			std::cout << errMsg << std::endl;
 		}
 		
 		std::array<char, MAX_PATH> szPathA;
-		if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathA.data()))) {
+		code = SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathA.data());
+		if(SUCCEEDED(code)) {
 			// Get the path to the textures folder
 			std::string_view szPathView(szPathA.data());
 			std::string appData(szPathView.substr(0, szPathView.rfind("AC")));
@@ -91,13 +116,20 @@ namespace Zenova {
 			appData.replace(appData.find(replaced), replaced.length(), "Microsoft.MinecraftUWP");
 
 			minecraft_path_str = appData;
+			Console::Log("StorageResolver::PathA", minecraft_path_str);
+		}
+		else {
+			_com_error err(code);
+			LPCTSTR errMsg = err.ErrorMessage();
+			std::cout << errMsg << std::endl;
 		}
 	}
 
 	StorageResolver::StorageResolver(const std::wstring& directory, const std::wstring& mirror) : StorageResolver() {
 		addMirrorDirectory(directory, mirror);
 	}
-		StorageResolver::StorageResolver(const std::vector<std::wstring>& directories, const std::vector<std::wstring>& mirrors) : StorageResolver() {
+
+	StorageResolver::StorageResolver(const std::vector<std::wstring>& directories, const std::vector<std::wstring>& mirrors) : StorageResolver() {
 		addMirrorDirectory(directories, mirrors);
 	}
 
@@ -113,7 +145,7 @@ namespace Zenova {
 	}
 
 	OS::OS(OSType os) : type(os) {
-		Console::Print("ZenovaAPI", "Using " + OSTypeToString(os) + " Preset\n");
+		Console::Log("Zenova::OS", "Using " + OSTypeToString(os) + " Preset");
 	}
 	
 	std::string OS::OSTypeToString(const OSType& type) {
@@ -202,11 +234,12 @@ namespace Zenova {
 	
 		// Check if it's accessing resources; this method should work in all future updates
 		if(filePath.find(Zenova::StorageResolver::minecraft_path_wstr) != filePath.npos) {
-			std::wcout << "File: " << filePath << "\n";
-			std::cout << "{ " << WinAPI::getAccessRightString(dwDesiredAccess) << ", " 
-				<< WinAPI::getShareRightString(dwShareMode) <<  ", "
-				<< WinAPI::getCreationDispositionString(dwCreationDisposition) << ", " 
-				<< WinAPI::getFlagsAndAttributesString(dwFlagsAndAttributes) << " }" << "\n\n" << std::flush;
+			Zenova::Console console("Zenova::Windows::CreateFileW");
+			console.Log(L"File: " + std::wstring(filePath.data()));
+			console.Log("{ " + WinAPI::getAccessRightString(dwDesiredAccess) + ", " 
+				+ WinAPI::getShareRightString(dwShareMode) +  ", "
+				+ WinAPI::getCreationDispositionString(dwCreationDisposition) + ", " 
+				+ WinAPI::getFlagsAndAttributesString(dwFlagsAndAttributes) + " }");
 	
 			std::wstring newPath(L"D:/minecraftWorlds/");
 			std::wstring_view strToFind(L"/minecraftWorlds/");
@@ -223,10 +256,10 @@ namespace Zenova {
 	HANDLE Windows::CreateDirectoryW(LPCWSTR lpFilename, LPSECURITY_ATTRIBUTES saAttributes) {
 		//Can't redirect Directory Creates to folders the UWP app doesn't have access to
 		std::wstring_view filePath(lpFilename);
-		std::wcout << filePath << std::endl;
 
 		// Check if it's accessing resources; this method should work in all future updates
 		if(filePath.find(Zenova::StorageResolver::minecraft_path_wstr) != filePath.npos) {
+			Console::Log(L"Zenova::Windows::CreateDirectoryW", filePath.data());
 			std::wstring newPath(L"D:/minecraftWorlds/");
 			std::wstring newDir(newPath);
 			std::wstring_view strToFind(L"/minecraftWorlds/");
@@ -247,10 +280,10 @@ namespace Zenova {
 	HANDLE Windows::CreateDirectoryA(LPCSTR lpFilename, LPSECURITY_ATTRIBUTES saAttributes) {
 		//Can't redirect Directory Creates to folders the UWP app doesn't have access to
 		std::string_view filePath(lpFilename);
-		std::cout << filePath << std::endl;
 
 		// Check if it's accessing resources; this method should work in all future updates
 		if(filePath.find(Zenova::StorageResolver::minecraft_path_str) != filePath.npos) {
+			Console::Log("Zenova::Windows::CreateDirectoryA", filePath.data());
 			std::string newPath("D:/minecraftWorlds/");
 			std::string newDir(newPath);
 			std::string strToFind("/minecraftWorlds/");
@@ -393,10 +426,10 @@ namespace Zenova {
 
 	DWORD __stdcall Start(void* dllHandle) {
 		BaseAddress = Util::GetModuleBaseAddress("Minecraft.Windows.exe");
-		Console console;
+		Console console("Zenova::Start");
 
-		Console::Print("ZenovaAPI", "Zenova Started\n");
-		Console::Print("ZenovaAPI", "Minecraft at: " + Util::to_hex_string(reinterpret_cast<uintptr_t>(BaseAddress)) + "\n");
+		console.Log("Zenova Started");
+		console.Log("Minecraft at: " + Util::to_hex_string(reinterpret_cast<uintptr_t>(BaseAddress)));
 	
 		//determine the os we're running on
 	#ifdef WIN32
@@ -405,7 +438,7 @@ namespace Zenova {
 		std::shared_ptr<OS> os = std::make_shared<Linux>();
 	#endif
 
-		DebugBreak();
+		//DebugBreak();
 		
 		StorageResolver storage(L"minecraftWorlds/", L"D:/MinecraftBedrock/Worlds");
 		setupHooks(os);
@@ -415,7 +448,7 @@ namespace Zenova {
 		bool run = true;
 		while(run) {} //maybe do something with this? /shrug
 
-		Console::Print("ZenovaAPI", "Zenova Stopped\n");
+		console.Log("Zenova Stopped");
 		return 0;
 	}
 }

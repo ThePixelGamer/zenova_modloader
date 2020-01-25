@@ -5,6 +5,7 @@
 	#include <Windows.h>
 	#include <Shlobj.h>
 	#include <TlHelp32.h>
+	#include <comdef.h>
 #elif
 	using BOOL = bool;
 	using DWORD = unsigned long;
@@ -77,18 +78,22 @@ namespace Zenova {
 	
 	class Console {
 		FILE* console = nullptr;
+		std::string name;
 
 	public:
-		Console();
+		Console(const std::string& name);
 		~Console();
 
-		static void Print(const std::string& name, const std::string& message);
+		void Log(const std::string& message);
+		void Log(const std::wstring& message);
+		static void Log(const std::string& name, const std::string& message);
+		static void Log(const std::wstring& name, const std::wstring& message);
 	};
 
 	class StorageResolver {
 	public:
-		static std::string_view minecraft_path_str;
-		static std::wstring_view minecraft_path_wstr;
+		static std::string minecraft_path_str;
+		static std::wstring minecraft_path_wstr;
 		static std::unordered_map<std::wstring, std::wstring> mirror_directory;
 
 		StorageResolver();
