@@ -1,22 +1,22 @@
-#include "bedrock/BlockLegacy.h"
-#include "bedrock/Ptr.h"
+#include "Minecraft/BlockLegacy.h"
+#include "Minecraft/Ptr.h"
 
-#include "ZenovaCore.h"
+#include "Zenova/Hook.h"
 
 BlockLegacy::BlockLegacy(const std::string& name, int id, const Material& mat) {
-	((void (*)(BlockLegacy*, const std::string&, int, const Material&))SlideAddress(0x1241660))(this, name, id, mat);
+	Zenova::Hook::Call<void>(FSIG, this, name, id, mat);
 }
 
 BlockLegacy& BlockLegacy::setCategory(CreativeItemCategory category) {
-	return ((BlockLegacy& (*)(CreativeItemCategory))SlideAddress(0x0))(category);
+	return Zenova::Hook::Call<BlockLegacy&>(FSIG, this, category);
 }
 
 WeakPtr<BlockLegacy> BlockLegacy::createWeakPtr() {
-	return ((WeakPtr<BlockLegacy> (*)())SlideAddress(0x0))();
+	return Zenova::Hook::Call<WeakPtr<BlockLegacy>>(FSIG, this);
 }
 
 const std::string& BlockLegacy::getRawNameId() {
-	return ((const std::string& (*)())SlideAddress(0x0))();
+	return Zenova::Hook::Call<const std::string&>(FSIG, this);
 }
 
 BlockLegacy::~BlockLegacy() {}

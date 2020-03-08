@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\ExampleMod">
+      <UniqueIdentifier>{a47c1df0-328f-4894-b37b-0348756465a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ExampleMod">
+      <UniqueIdentifier>{2201ea4f-a46d-45a3-a075-c1d68d988d89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -21,6 +27,18 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ExampleMod\ExampleBlock.h">
+      <Filter>Header Files\ExampleMod</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ExampleMod\ExampleBlockTypes.h">
+      <Filter>Header Files\ExampleMod</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ExampleMod\ExampleItem.h">
+      <Filter>Header Files\ExampleMod</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ExampleMod\ExampleItems.h">
+      <Filter>Header Files\ExampleMod</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -28,6 +46,18 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExampleBlock.cpp">
+      <Filter>Source Files\ExampleMod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExampleBlockTypes.cpp">
+      <Filter>Source Files\ExampleMod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExampleItem.cpp">
+      <Filter>Source Files\ExampleMod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ExampleItems.cpp">
+      <Filter>Source Files\ExampleMod</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

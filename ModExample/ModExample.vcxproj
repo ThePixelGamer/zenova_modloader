@@ -91,7 +91,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;MODEXAMPLE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>../ZenovaAPI/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ZenovaAPI\inc;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,6 +157,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="include\ExampleMod\ExampleBlock.h" />
+    <ClInclude Include="include\ExampleMod\ExampleBlockTypes.h" />
+    <ClInclude Include="include\ExampleMod\ExampleItem.h" />
+    <ClInclude Include="include\ExampleMod\ExampleItems.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +171,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="source\ExampleBlock.cpp" />
+    <ClCompile Include="source\ExampleBlockTypes.cpp" />
+    <ClCompile Include="source\ExampleItem.cpp" />
+    <ClCompile Include="source\ExampleItems.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

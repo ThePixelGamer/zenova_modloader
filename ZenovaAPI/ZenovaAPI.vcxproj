@@ -114,7 +114,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>ZENOVA_EXPORTS;_DEBUG;ZENOVA_DLL_COMPILE;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZENOVA_EXPORT;_DEBUG;ZENOVA_API;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -185,41 +185,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\bedrock\Block.cpp" />
-    <ClCompile Include="src\bedrock\BlockLegacy.cpp" />
-    <ClCompile Include="src\bedrock\BlockTypeRegistry.cpp" />
-    <ClCompile Include="src\bedrock\Item.cpp" />
-    <ClCompile Include="src\bedrock\ItemRegistry.cpp" />
-    <ClCompile Include="src\bedrock\Util.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
-    <ClCompile Include="src\ExampleMod\ExampleBlock.cpp" />
-    <ClCompile Include="src\ExampleMod\ExampleBlockTypes.cpp" />
-    <ClCompile Include="src\ExampleMod\ExampleItem.cpp" />
-    <ClCompile Include="src\ExampleMod\ExampleItems.cpp" />
+    <ClCompile Include="src\Minecraft\Block.cpp" />
+    <ClCompile Include="src\Minecraft\BlockLegacy.cpp" />
+    <ClCompile Include="src\Minecraft\BlockTypeRegistry.cpp" />
+    <ClCompile Include="src\Minecraft\Item.cpp" />
+    <ClCompile Include="src\Minecraft\ItemRegistry.cpp" />
+    <ClCompile Include="src\Minecraft\Util.cpp" />
+    <ClCompile Include="src\Zenova\Hook.cpp" />
+    <ClCompile Include="src\Zenova\Log.cpp" />
+    <ClCompile Include="src\Zenova\Mod.cpp" />
+    <ClCompile Include="src\Zenova\OS\Linux.cpp" />
+    <ClCompile Include="src\Zenova\OS\OS.cpp" />
+    <ClCompile Include="src\Zenova\OS\Windows.cpp" />
+    <ClCompile Include="src\Zenova\StorageResolver.cpp" />
     <ClCompile Include="src\zenova\Zenova.cpp" />
-    <ClCompile Include="src\zenova\ZenovaCore.cpp" />
-    <ClCompile Include="src\zenova\ZenovaMod.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\bedrock\Actor.h" />
-    <ClInclude Include="inc\bedrock\Block.h" />
-    <ClInclude Include="inc\bedrock\BlockLegacy.h" />
-    <ClInclude Include="inc\bedrock\BlockPos.h" />
-    <ClInclude Include="inc\bedrock\BlockSource.h" />
-    <ClInclude Include="inc\bedrock\BlockTypeRegistry.h" />
-    <ClInclude Include="inc\bedrock\Item.h" />
-    <ClInclude Include="inc\bedrock\ItemRegistry.h" />
-    <ClInclude Include="inc\bedrock\Material.h" />
-    <ClInclude Include="inc\bedrock\Ptr.h" />
-    <ClInclude Include="inc\bedrock\Util.h" />
     <ClInclude Include="inc\MinHook.h" />
     <ClInclude Include="inc\Zenova.h" />
-    <ClInclude Include="inc\ZenovaCore.h" />
-    <ClInclude Include="inc\ZenovaMod.h" />
-    <ClInclude Include="src\ExampleMod\ExampleBlock.h" />
-    <ClInclude Include="src\ExampleMod\ExampleBlockTypes.h" />
-    <ClInclude Include="src\ExampleMod\ExampleItem.h" />
-    <ClInclude Include="src\ExampleMod\ExampleItems.h" />
+    <ClInclude Include="inc\Zenova\Common.h" />
+    <ClInclude Include="inc\Zenova\Hook.h" />
+    <ClInclude Include="inc\Zenova\Log.h" />
+    <ClInclude Include="inc\Zenova\Mod.h" />
+    <ClInclude Include="inc\Zenova\OS\Linux.h" />
+    <ClInclude Include="inc\Zenova\OS\OS.h" />
+    <ClInclude Include="inc\Zenova\OS\Windows.h" />
+    <ClInclude Include="inc\Zenova\StorageResolver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

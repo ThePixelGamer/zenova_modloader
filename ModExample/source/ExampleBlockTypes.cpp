@@ -4,8 +4,8 @@
 #include "ZenovaCore.h"
 
 #include "ExampleMod/ExampleBlock.h"
-#include "bedrock/Ptr.h"
-#include "bedrock/BlockTypeRegistry.h"
+#include "Minecraft/Ptr.h"
+#include "Minecraft/BlockTypeRegistry.h"
 
 #include <cstdint>
 

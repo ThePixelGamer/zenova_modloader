@@ -1,0 +1,1 @@
+#include "Minecraft/BlockTypeRegistry.h"

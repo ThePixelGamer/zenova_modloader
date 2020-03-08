@@ -1,4 +1,4 @@
-#include "bedrock/Util.h"
+#include "Minecraft/Util.h"
 
 std::string Util::toLower(const std::string&) {
 	return "";

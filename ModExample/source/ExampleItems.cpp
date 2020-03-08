@@ -3,7 +3,7 @@
 
 #include "ZenovaCore.h"
 
-#include "bedrock/ItemRegistry.h"
+#include "Minecraft/ItemRegistry.h"
 
 ClientInstance* ExampleItems::instance;
 WeakPtr<Item> ExampleItems::exampleItem;

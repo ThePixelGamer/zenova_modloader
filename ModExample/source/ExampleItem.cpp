@@ -1,28 +1,29 @@
 ﻿#include "ExampleMod/ExampleItem.h"
-#include "ZenovaCore.h"
+#include "Zenova/Hook.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "bedrock/Actor.h"
-#include "bedrock/Block.h"
-#include "bedrock/BlockLegacy.h"
-#include "bedrock/BlockSource.h"
+#include "Minecraft/Actor.h"
+#include "Minecraft/Block.h"
+#include "Minecraft/BlockLegacy.h"
+#include "Minecraft/BlockSource.h"
 
-#include "bedrock/Ptr.h"
+#include "Minecraft/Ptr.h"
 
-ExampleItem::ExampleItem(const std::string& name, short id) : Item(name, id) {
+ExampleItem::ExampleItem(const std::string& name, short id) : Item(name, id), Zenova::Structure("vItem") {
 	//Replace our vtable with calls to the original vtable, but keep the ones we've overriden
-	CompareAndReplace<Item>(reinterpret_cast<uintptr_t*>(this), (uintptr_t*)SlideAddress(0x244A108));
+	Zenova::Hook::RepairVtable<Item>(reinterpret_cast<uintptr_t*>(this), reinterpret_cast<uintptr_t*>(Zenova::Hook::Symbols["vItem"]));
 	setCategory(CreativeItemCategory::TOOLS);
 	setMaxStackSize(16);
 }
 
+//fix this by moving all the SlideAddress calls into their proper classes
 void ExampleItem::placeHouse(BlockSource* source, const BlockPos& pos) const {
 	auto set = [&](WeakPtr<BlockLegacy> blockPtr, BlockPos blockpos, unsigned char update) {
 		//WeakPtr<BlockLegacy> blockPtr = ((WeakPtr<BlockLegacy>(*)(const std::string&))SlideAddress(0x12A0300))(name); //BlockTypeRegistry::lookupByName
-		return ((bool (*)(BlockSource*, int, int, int, const Block&, int))SlideAddress(0x13338F0))(source, blockpos.x, blockpos.y, blockpos.z, *blockPtr->block, update); //1 updateable, 2 let renderer know a block's changed, needs more research
+		return Zenova::Hook::Call<bool>(Zenova::Hook::SlideAddress(0x13338F0), source, blockpos.x, blockpos.y, blockpos.z, *blockPtr->block, update); //1 updateable, 2 let renderer know a block's changed, needs more research
 	};
 
 	auto get = [&](const std::vector<WeakPtr<BlockLegacy>>& blockPtr, const BlockPos& blockpos) {

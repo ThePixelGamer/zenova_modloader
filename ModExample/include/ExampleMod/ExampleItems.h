@@ -18,7 +18,7 @@ public:
 	virtual LocalPlayer* getLocalPlayer() const { return (LocalPlayer*)NULL; }
 };
 
-#include "../inc/bedrock/Ptr.h"
+#include "../inc/Minecraft/Ptr.h"
 class Item;
 
 class ExampleItems {

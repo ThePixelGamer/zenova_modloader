@@ -3,14 +3,44 @@
 
 #include "Zenova.h"
 
-#define DLL_API __declspec(dllexport)
+#include "ExampleMod/ExampleItems.h"
 
-class ExampleMod : public ZenovaMod {
+#define DLL_FUNCTION extern "C" __declspec(dllexport)
+
+void (*_registerItems)(bool);
+void (*_initCreativeItemsCallback)(class ActorInfoRegistry*, class BlockDefinitionGroup*, bool);
+void (*_initClientData)();
+
+void registerItems(bool b1) {
+	_registerItems(b1);
+
+	ExampleItems::init();
+}
+
+void initCreativeItemsCallback(class ActorInfoRegistry* actorInfoRegistry, class BlockDefinitionGroup* blockDefinitionGroup, bool b1) {
+	_initCreativeItemsCallback(actorInfoRegistry, blockDefinitionGroup, b1);
+
+	ExampleItems::initCreativeItems();
+}
+
+void initClientData() {
+	_initClientData();
+
+	ExampleItems::loadResources();
+}
+
+class ExampleMod : public Zenova::Mod {
 public:
-	ExampleMod() : ZenovaMod("Example Mod", {1, 0, 0}, "Description") {}
+	ExampleMod() : Zenova::Mod("Example Mod", {1, 0, 0}, "Description") {}
 
 	virtual void Start() {
 		std::cout << "ModExample Start" << std::endl;
+
+		//uintptr_t** vtable = (uintptr_t**)SlideAddress(0x2460D70) + 1; //to avoid calling the virtual deconstructor
+		//CreateHook((void*) SlideAddress(0x11848A0), (void*) &registerItems, (void**) &_registerItems); //VanillaItems::registerItems(bool)
+		//CreateHook((void*) SlideAddress(0x1193AF0), (void*) &initCreativeItemsCallback, (void**) &_initCreativeItemsCallback); //VanillaItems::initCreativeItemsCallback(ActorInfoRegistry*, BlockDefinitionGroup*, bool)
+		//os->CreateHook((void*) SlideAddress(0x118F7F0), (void*) &initClientData, (void**) &_initClientData); //VanillaItems::initClientData()
+		//CreateHook((void*) SlideAddress(0x008F060), (void*) &init, (void**) &_init); //ClientInstance::init()
 	}
 
 	virtual void Update() {
@@ -22,25 +52,15 @@ public:
 	}
 };
 
-extern "C" {
-	DLL_API ZenovaMod* CreateMod() {
-		return new ExampleMod;
-	}
-
-	DLL_API void DeleteMod(ZenovaMod* mod) {
-		delete mod;
-	}
+DLL_FUNCTION void* CreateMod() {
+	return new ExampleMod();
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-	if(ul_reason_for_call == DLL_PROCESS_ATTACH) {
-		OutputDebugStringA("Hi.\n");
+DLL_FUNCTION void DeleteMod(Zenova::Mod* mod) {
+	delete mod;
+}
 
-		if(GetModuleBaseAddress("Minecraft.Windows.exe")) { //to avoid being attached to the runtime broker
-			HANDLE tHandle = CreateThread(nullptr, 0, Zenova::Start, new HMODULE(hModule), 0, nullptr);
-			if(tHandle) 
-				CloseHandle(tHandle);
-		}
-	}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
 	return TRUE;
 }

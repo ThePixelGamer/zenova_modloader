@@ -2,9 +2,10 @@
 
 #include <string>
 
-#include "../inc/bedrock/Item.h"
+#include "Minecraft/Item.h"
+#include "Zenova/Structure.h"
 
-class ExampleItem : public Item {
+class ExampleItem : public Item, public Zenova::Structure {
 public:
 	ExampleItem(const std::string&, short);
 	virtual bool _useOn(ItemStack&, Actor&, BlockPos, unsigned char, float, float, float) const;

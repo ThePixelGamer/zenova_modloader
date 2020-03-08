@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../inc/bedrock/BlockLegacy.h"
+#include "../inc/Minecraft/BlockLegacy.h"
 
 class ExampleBlock : public BlockLegacy {
 public:
