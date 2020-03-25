@@ -116,102 +116,6 @@ namespace Zenova {
 	HANDLE(__stdcall *pfnCreateDirectoryW)(LPCWSTR, LPSECURITY_ATTRIBUTES);
 	HANDLE(__stdcall *pfnCreateDirectoryA)(LPCSTR, LPSECURITY_ATTRIBUTES);
 
-	//shamelessly stolen from https://docs.microsoft.com/en-us/windows/win32/secauthz/creating-a-security-descriptor-for-a-new-object-in-c
-	class SecurityDescriptor {
-	public:
-		PACL pACL = NULL;
-		PSECURITY_DESCRIPTOR pSD = NULL;
-		SECURITY_ATTRIBUTES sa;
-		DWORD dwRes, dwDisposition;
-		PSID pEveryoneSID = NULL, pPackagesSID = NULL;
-		EXPLICIT_ACCESS ea[2];
-		SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
-		LONG lRes;
-		HKEY hkSub = NULL;
-
-		SecurityDescriptor() {
-			// Create a well-known SID for the Everyone group.
-			if(!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID,
-								0, 0, 0, 0, 0, 0, 0, &pEveryoneSID)) {
-				printf("AllocateAndInitializeSid Error %u\n", GetLastError());
-				return;
-			}
-
-			// Initialize an EXPLICIT_ACCESS structure for an ACE.
-			// The ACE will allow Everyone read access to the key.
-			ZeroMemory(&ea, 2 * sizeof(EXPLICIT_ACCESS));
-			ea[0].grfAccessPermissions = KEY_READ;
-			ea[0].grfAccessMode = SET_ACCESS;
-			ea[0].grfInheritance= NO_INHERITANCE;
-			ea[0].Trustee.TrusteeForm = TRUSTEE_IS_SID;
-			ea[0].Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
-			ea[0].Trustee.ptstrName  = (LPTSTR) pEveryoneSID;
-
-			// Grab a SID for the ALL APPLICATION PACKAGES group. https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/81d92bba-d22b-4a8c-908a-554ab29148ab
-			if(!ConvertStringSidToSidA("S-1-15-2-1", &pPackagesSID)) {
-				printf("ConvertStringSidToSidA Error %u\n", GetLastError());
-				return; 
-			}
-
-			// Initialize an EXPLICIT_ACCESS structure for an ACE.
-			// The ACE will allow the Administrators group full access to
-			// the key.
-			ea[1].grfAccessPermissions = KEY_ALL_ACCESS;
-			ea[1].grfAccessMode = SET_ACCESS;
-			ea[1].grfInheritance= NO_INHERITANCE;
-			ea[1].Trustee.TrusteeForm = TRUSTEE_IS_SID;
-			ea[1].Trustee.TrusteeType = TRUSTEE_IS_GROUP;
-			ea[1].Trustee.ptstrName  = (LPTSTR) pPackagesSID;
-
-			// Create a new ACL that contains the new ACEs.
-			dwRes = SetEntriesInAcl(2, ea, NULL, &pACL);
-			if (ERROR_SUCCESS != dwRes) {
-				printf("SetEntriesInAcl Error %u\n", GetLastError());
-				return;
-			}
-
-			// Initialize a security descriptor.  
-			pSD = (PSECURITY_DESCRIPTOR) LocalAlloc(LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH); 
-			if (NULL == pSD) { 
-				printf("LocalAlloc Error %u\n", GetLastError());
-				return; 
-			} 
- 
-			if (!InitializeSecurityDescriptor(pSD, SECURITY_DESCRIPTOR_REVISION)) {  
-				printf("InitializeSecurityDescriptor Error %u\n", GetLastError());
-				return; 
-			} 
- 
-			// Add the ACL to the security descriptor. 
-			if (!SetSecurityDescriptorDacl(pSD, /*bDaclPresent flag*/ TRUE, pACL, /*not a default DACL*/FALSE)) {  
-				printf("SetSecurityDescriptorDacl Error %u\n", GetLastError());
-				return; 
-			} 
-
-			// Initialize a security attributes structure.
-			sa.nLength = sizeof (SECURITY_ATTRIBUTES);
-			sa.lpSecurityDescriptor = pSD;
-			sa.bInheritHandle = FALSE;
-
-			printf("SecurityDescriptor successfully generated\n");
-		}
-
-		~SecurityDescriptor() {
-			if (pEveryoneSID) 
-				FreeSid(pEveryoneSID);
-			if (pPackagesSID) 
-				FreeSid(pPackagesSID);
-			if (pACL) 
-				LocalFree(pACL);
-			if (pSD) 
-				LocalFree(pSD);
-			if (hkSub) 
-				RegCloseKey(hkSub);
-
-			printf("SecurityDescriptor died");
-		}
-	};
-
 	HANDLE CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile) {
 		//Can't redirect File Creates to folders the UWP app doesn't have access to
 		std::wstring_view filePath(lpFileName);
@@ -221,10 +125,9 @@ namespace Zenova {
 		// Check if it's accessing resources; this method should work in all future updates
 		if(filePath.rfind(L"mcworld") != filePath.npos) {
 			//Zenova::Console console("Zenova::Windows::CreateFileW");
-			/*console.*/Log::info(L"Zenova::Windows::CreateFileW", L"File: " + std::wstring(filePath.data()));
-			/*console.*/Log::info("Zenova::Windows::CreateFileW", "{ " + Util::getAccessRightString(dwDesiredAccess) + ", " 
-				+ Util::getShareRightString(dwShareMode) +  ", " + Util::getCreationDispositionString(dwCreationDisposition) + ", " 
-				+ Util::getFlagsAndAttributesString(dwFlagsAndAttributes) + " }");
+			Info(std::wstring(L"File: ") + filePath.data());
+			Info("{ " + Util::getAccessRightString(dwDesiredAccess) + ", " + Util::getShareRightString(dwShareMode) +  ", " 
+				+ Util::getCreationDispositionString(dwCreationDisposition) + ", " + Util::getFlagsAndAttributesString(dwFlagsAndAttributes) + " }");
 
 			//std::wstring newPath(L"D:/minecraftWorlds/");
 			//std::wstring_view strToFind(L"/minecraftWorlds/");
@@ -252,11 +155,9 @@ namespace Zenova {
 		//Can't redirect Directory Creates to folders the UWP app doesn't have access to
 		std::wstring_view filePath(lpFilename);
 
-		std::wcout << StorageResolver::minecraft_path_wstr << std::endl;
-
 		// Check if it's accessing resources; this method should work in all future updates
-		if(filePath.find(StorageResolver::minecraft_path_wstr) != filePath.npos) {
-			Log::info(L"Zenova::Windows::CreateDirectoryW", filePath.data());
+		if(filePath.find(StorageResolver::minecraft_path) != filePath.npos) {
+			//Log::info(L"Zenova::Windows::CreateDirectoryW", filePath.data());
 			std::wstring newPath(L"D:/minecraftWorlds/");
 			std::wstring newDir(newPath);
 			std::wstring_view strToFind(L"/minecraftWorlds/");
@@ -279,8 +180,8 @@ namespace Zenova {
 		std::string_view filePath(lpFilename);
 
 		// Check if it's accessing resources; this method should work in all future updates
-		if(filePath.find(StorageResolver::minecraft_path_str) != filePath.npos) {
-			Log::info("Zenova::Windows::CreateDirectoryA", filePath.data());
+		if(filePath.find(StorageResolver::minecraft_path.str()) != filePath.npos) {
+			//Log::info("Zenova::Windows::CreateDirectoryA", filePath.data());
 			std::string newPath("D:/minecraftWorlds/");
 			std::string newDir(newPath);
 			std::string strToFind("/minecraftWorlds/");
@@ -299,7 +200,7 @@ namespace Zenova {
 	}
 	
 	namespace Util {
-		uintptr_t GetModuleBaseAddress(const char* modName) {
+		uintptr_t GetModuleBaseAddressA(const char* modName) {
 			DWORD procId = GetCurrentProcessId();
 			uintptr_t modBaseAddr = 0;
 			HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
@@ -319,7 +220,7 @@ namespace Zenova {
 			return modBaseAddr;
 		}
 
-		uintptr_t GetModuleBaseAddress(const wchar_t* modName) {
+		uintptr_t GetModuleBaseAddressW(const wchar_t* modName) {
 			DWORD procId = GetCurrentProcessId();
 			uintptr_t modBaseAddr = 0;
 			HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);

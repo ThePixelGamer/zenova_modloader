@@ -186,12 +186,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp" />
-    <ClCompile Include="src\Minecraft\Block.cpp" />
-    <ClCompile Include="src\Minecraft\BlockLegacy.cpp" />
-    <ClCompile Include="src\Minecraft\BlockTypeRegistry.cpp" />
-    <ClCompile Include="src\Minecraft\Item.cpp" />
-    <ClCompile Include="src\Minecraft\ItemRegistry.cpp" />
-    <ClCompile Include="src\Minecraft\Util.cpp" />
+    <ClCompile Include="src\Zenova\Common.cpp" />
     <ClCompile Include="src\Zenova\Hook.cpp" />
     <ClCompile Include="src\Zenova\Log.cpp" />
     <ClCompile Include="src\Zenova\Mod.cpp" />

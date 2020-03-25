@@ -1,19 +1,22 @@
 #pragma once
 
-#include <string>
-
 #include "Common.h"
 
 namespace Zenova {
-	class Log {
-		std::string name;
-
-	public:
-		Log(const std::string& name);
-
-		void info(const std::string& message);
-		void info(const std::wstring& message);
-		static void info(const std::string& name, const std::string& message);
-		static void info(const std::wstring& name, const std::wstring& message);
+	enum class LogSeverity : int {
+		none = 0,
+		info,
+		warning,
+		error
 	};
+
+	class EXPORT Message {
+	public:
+		Message(LogSeverity severity, std::tstring message, std::tstring name);
+		Message(std::tstring severity, std::tstring message, std::tstring name);
+	};
+
+	#define Info(message) Message(LogSeverity::info, message, __FUNCTION__)
+	#define Warn(message) Message(LogSeverity::warning, message, __FUNCTION__)
+	#define Error(message) Message(LogSeverity::error, message, __FUNCTION__)
 }

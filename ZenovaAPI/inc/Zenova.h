@@ -17,4 +17,8 @@ namespace Zenova {
 #ifdef ZENOVA_API
 	unsigned long __stdcall Start(void* dllHandle); //don't try to run this : )
 #endif // ZENOVA_API
+
+	namespace Util {
+		std::wstring StrToWstr(const std::string& oldstr);
+	}
 }

@@ -1,6 +1,6 @@
 #include "Zenova.h"
 
-#include <iostream> //std::cout (Zenova::Console)
+#include <iostream> //std::cout (Zenova::MessageRedirection)
 #include <algorithm> //std::find_if
 #include <fstream>
 #include <cstdio>
@@ -11,6 +11,21 @@ namespace Zenova {
 	//setup these macros with cmake
 	#ifdef _WINDOWS
 		std::shared_ptr<OS> hostOS = std::make_shared<Windows>();
+		void ErrorPrinter() {
+			// Convert GetLastError() to an actual string using the windows api
+			LPVOID message_buffer{};
+			const auto last_error = GetLastError();
+
+			FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+						  NULL, last_error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+						  reinterpret_cast<LPSTR>(&message_buffer), 0, NULL);
+			if (message_buffer == nullptr) {
+				return;
+			}
+
+			Error(reinterpret_cast<LPSTR>(message_buffer));
+			LocalFree(message_buffer);
+		}
 	#elif Linux
 		std::shared_ptr<OS> hostOS = std::make_shared<Linux>();
 	#endif
@@ -21,6 +36,7 @@ namespace Zenova {
 	public:
 		MessageRedirection() {
 			if(!AllocConsole()) {
+				ErrorPrinter();
 				return;
 			}
 
@@ -34,12 +50,20 @@ namespace Zenova {
 				std::cerr.clear();
 				std::cin.clear();
 
-				//add something for wide stuff? seems to work fine for the time being...
+				HANDLE hConOut = CreateFileA("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+				HANDLE hConIn = CreateFileA("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+				SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
+				SetStdHandle(STD_ERROR_HANDLE, hConOut);
+				SetStdHandle(STD_INPUT_HANDLE, hConIn);
+				std::wcout.clear();
+				std::wclog.clear();
+				std::wcerr.clear();
+				std::wcin.clear();
 			}
 		}
 		~MessageRedirection() {
 			if(!FreeConsole()) {
-				//Show error with GetLastError();
+				ErrorPrinter();
 			}
 
 			if(console) {
@@ -49,7 +73,7 @@ namespace Zenova {
 	};
 	
 #ifdef ZENOVA_API
-	std::string ZenovaFolder = "D:/Zenova/";
+	std::string ZenovaFolder = "D:/Zenova";
 
 	void LoadSymbolMaps() {
 
@@ -67,9 +91,14 @@ namespace Zenova {
 					ret.push_back(std::make_pair(reinterpret_cast<Mod*>(createMod()), hModule));
 					continue;
 				}
+				else {
+					Warn("Failed to find CreateMod in " + mod);
+				}
 			}
-
-			Log::info("LoadMods", mod.substr(mod.rfind("/") + 1, mod.rfind(".dll")) + " failed to load");
+			else {
+				ErrorPrinter();
+				Warn(mod.substr(mod.rfind("/") + 1, mod.rfind(".dll")) + " failed to load");
+			}
 		}
 		
 		return ret;
@@ -99,16 +128,15 @@ namespace Zenova {
 			} while(FindNextFile(dir, &fileData));
 		}
 
-		return Profile{libNames};
+		return {libNames};
 	}
 
 	unsigned long __stdcall Start(void* dllHandle) {
-		Hook::BaseAddress = Util::GetModuleBaseAddress("Minecraft.Windows.exe");
+		Hook::BaseAddress = Util::GetModuleBaseAddressA("Minecraft.Windows.exe");
 		MessageRedirection console;
-		Log logger("Zenova::Start");
 
-		logger.info("Zenova Started");
-		logger.info("Minecraft at: " + Util::to_hex_string(Hook::BaseAddress));
+		Info("Zenova Started");
+		Info("Minecraft at: " + Util::to_hex_string(Hook::BaseAddress));
 	
 		StorageResolver storage(L"minecraftWorlds/", L"D:/MinecraftBedrock/Worlds");
 		
@@ -118,7 +146,6 @@ namespace Zenova {
 		
 		Profile profile = LoadProfile();
 		std::vector<std::pair<Mod*, HMODULE>> mods = LoadMods(profile.libraryNames);
-		//HMODULE module = LoadLibraryA();
 		
 		for(auto [first, second] : mods) {
 			first->Start();
@@ -136,7 +163,7 @@ namespace Zenova {
 			FreeLibrary(second);
 		}
 
-		logger.info("Zenova Stopped");
+		Info("Zenova Stopped");
 		return 0;
 	}
 #endif // ZENOVA_API

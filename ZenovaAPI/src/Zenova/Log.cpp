@@ -2,33 +2,34 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 
-#include "Zenova/OS/Windows.h"
+#include "Zenova.h"
 
 namespace Zenova {
-	Log::Log(const std::string& t_name) : name(t_name) {}
-
-	void Log::info(const std::string& message) {
-		Log::info(name, message);
+	template <typename T, typename = typename std::enable_if<std::is_enum<T>::value>::type>
+	constexpr size_t EnumIndex(T value) {
+		return static_cast<typename std::underlying_type<T>::type>(value);
 	}
 
-	void Log::info(const std::wstring& message) {
-		std::wstringstream str2wstr;
-		str2wstr << name.c_str();
-		Log::info(str2wstr.str(), message);
-	}
+	std::vector<std::tstring> severityStrings {{
+		"Info", "Warning", "Error"
+	}};
 
-	void Log::info(const std::string& name, const std::string& message) {
-		std::string str("[" + name + "] " + message + "\n");
+	Message::Message(LogSeverity severity, std::tstring message, std::tstring name) : Message(severityStrings.at(EnumIndex(severity) - 1), message, name) {}
 
-		OutputDebugStringA(str.c_str());
-		std::cout << str << std::flush;
-	}
+	Message::Message(std::tstring severity, std::tstring message, std::tstring name) {
+		if(!name.empty()) {
+			message.insert(0, L"[" + name + L"] ");
+		}
 
-	void Log::info(const std::wstring& name, const std::wstring& message) {
-		std::wstring str(L"[" + name + L"] " + message + L"\n");
+		if(!severity.empty()) {
+			message.insert(0, L"[" + severity + L"] ");
+		}
 
-		OutputDebugStringW(str.c_str());
-		std::wcout << str << std::flush;
+		message += L"\n";
+
+		OutputDebugStringW(message.c_str());
+		std::wcout << message << std::flush;
 	}
 }

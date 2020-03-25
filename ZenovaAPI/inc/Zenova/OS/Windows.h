@@ -26,7 +26,7 @@ namespace Zenova {
 		virtual u32 SetPageProtect(void* addr, size_t len, u32 prot);
 		virtual size_t GetVtableSize(uintptr_t** vtableToCheck);
 
-		static void DebugPause();
+		static void EXPORT DebugPause();
 
 	#ifdef ZENOVA_API
 		virtual void SetupOS(void* variables); //meant to only be run once through ZenovaAPI.dll
@@ -48,8 +48,8 @@ namespace Zenova {
 			return stream.str();
 		}
 
-		uintptr_t GetModuleBaseAddress(const char* modName);
-		uintptr_t GetModuleBaseAddress(const wchar_t* modName);
+		EXPORT uintptr_t GetModuleBaseAddressA(const char* modName);
+		EXPORT uintptr_t GetModuleBaseAddressW(const wchar_t* modName);
 		DWORD GetModuleSize(DWORD, const char*);
 
 		//WinAPI to std::string

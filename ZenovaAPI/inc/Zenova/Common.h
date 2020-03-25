@@ -1,5 +1,8 @@
+#pragma once
+
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 
 #ifdef ZENOVA_EXPORT
 #define EXPORT __declspec(dllexport)
@@ -20,3 +23,26 @@ using i8 = int8_t;
 using i16 = int16_t;
 using i32 = int32_t;
 using i64 = int64_t;
+
+//move to a Util header?
+namespace Zenova {
+	namespace Util {
+		std::wstring StrToWstr(const std::string& oldstr);
+	}
+}
+
+//this is convienant, idc about the risks
+//implementation in Log.cpp
+namespace std {
+	class tstring : public wstring {
+	public:
+		string strData;
+
+		using wstring::wstring;
+		tstring(const string&);
+		tstring(const char*);
+		tstring(const wstring&);
+
+		const string& str();
+	};
+}

@@ -54,13 +54,7 @@
     <ClCompile Include="imgui\imgui_impl_sdl.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ZenovaLogger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ZenovaCommon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ZenovaDebugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,13 +71,7 @@
     <ClInclude Include="..\..\Utils\AppUtils.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="ZenovaLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ZenovaCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ZenovaDebugger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

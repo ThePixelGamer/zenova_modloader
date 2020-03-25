@@ -24,7 +24,7 @@ namespace Zenova {
 			auto iter = Symbols.find(funcName);
 
 			if(iter == Symbols.end()) {
-				Log::info("FindSymbol" , std::string("Function ") + funcName + "not found");
+				Info(std::string("Function ") + funcName + "not found");
 			}
 			else {
 				return iter->second;

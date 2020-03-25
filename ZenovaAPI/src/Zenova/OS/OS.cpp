@@ -4,7 +4,7 @@
 namespace Zenova {
 	OS::OS(OSType os) {
 		type = os;
-		Log::info("Zenova::OS", "Using " + OSTypeToString(os) + " Preset");
+		Info("Using " + OSTypeToString(os) + " Preset");
 	}
 	
 	std::string OS::OSTypeToString(const OSType& type) {

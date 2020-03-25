@@ -12,10 +12,7 @@ IMPORT int __argc;
 IMPORT char** __argv;
 //IMPORT wchar_t** __wargv;
 
-#define BUF_SIZE 256
-TCHAR szName[]=TEXT("Global\\PIDForDebugger");
-
-void launchProcess(std::string app, std::string arg) {
+void LaunchProcess(std::string app, std::string arg) {
 	// Prepare handles.
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi; // The function returns this
@@ -46,6 +43,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		}
 	}
 
+    LaunchProcess("C:\\Windows\\System32\\vsjitdebugger.exe", std::string(" -p " + std::to_string(dwProcessId)));
+
 	if(dwProcessId != 0 && SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))) {
 		std::wstring AppFullName = AppUtils::GetMinecraftPackageId();
 		AppUtils::AppDebugger app(AppFullName);
@@ -54,8 +53,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			CoUninitialize();
 			return E_FAIL;
 		}
-		
-		launchProcess("C:\\Windows\\System32\\vsjitdebugger.exe", std::string(" -p " + std::to_string(dwProcessId)));
 
 		// Assume the game is suspended and inject mods
 		ModLoader::InjectMods(dwProcessId);

@@ -73,7 +73,7 @@
     <OutDir>..\..\Zenova</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\Zenova</OutDir>
+    <OutDir>..\..\Zenova\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -147,8 +147,6 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ZenovaCommon.cpp" />
-    <ClCompile Include="ZenovaDebugger.cpp" />
-    <ClCompile Include="ZenovaLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Utils\AppUtils.h" />
@@ -156,8 +154,6 @@
     <ClInclude Include="..\..\Utils\utils.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ZenovaCommon.h" />
-    <ClInclude Include="ZenovaDebugger.h" />
-    <ClInclude Include="ZenovaLogger.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZenovaGUI.rc" />

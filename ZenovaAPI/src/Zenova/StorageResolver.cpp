@@ -11,8 +11,7 @@
 #include "Zenova/Log.h"
 
 namespace Zenova {
-	std::string StorageResolver::minecraft_path_str;
-	std::wstring StorageResolver::minecraft_path_wstr;
+	std::tstring StorageResolver::minecraft_path;
 	std::unordered_map<std::wstring, std::wstring> StorageResolver::mirror_directory;
 
 	StorageResolver::StorageResolver() {
@@ -22,7 +21,6 @@ namespace Zenova {
 		if(SUCCEEDED(code)) {
 			// Get the path to the textures folder
 			std::wstring_view szPathView(szPathW.data());
-			std::wcout << szPathView << std::endl;
 			std::wstring appData(szPathView.substr(0, szPathView.rfind(L"AC")));
 			appData += L"LocalState/games/com.mojang/";
 
@@ -37,59 +35,30 @@ namespace Zenova {
 			replaced = L"microsoft.minecraftuwp";
 			appData.replace(appData.find(replaced), replaced.length(), L"Microsoft.MinecraftUWP");
 
-			minecraft_path_wstr = appData;
-			Log::info(L"StorageResolver::PathW", minecraft_path_wstr);
+			minecraft_path = appData;
+			Info(minecraft_path);
 		}
 		else {
 			_com_error err(code);
-			LPCTSTR errMsg = err.ErrorMessage();
-			std::cout << errMsg << std::endl;
-		}
-		
-		std::array<char, MAX_PATH> szPathA;
-		code = SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPathA.data());
-		if(SUCCEEDED(code)) {
-			// Get the path to the textures folder
-			std::string_view szPathView(szPathA.data());
-			std::string appData(szPathView.substr(0, szPathView.rfind("AC")));
-			appData += "LocalState/games/com.mojang/";
-
-			//Change all the trailing backslashes into forward slash
-			std::string_view replaced = "\\";
-			for(size_t start = 0, pos = 0, end = appData.find("LocalState"); start != end; start = pos + replaced.length()) {
-				pos = appData.find(replaced, start);
-				appData.replace(pos, replaced.length(), "/");
-			}
-
-			//SHGetFolderPathW doesn't properly captialize this, use lowercase in the future?
-			replaced = "microsoft.minecraftuwp";
-			appData.replace(appData.find(replaced), replaced.length(), "Microsoft.MinecraftUWP");
-
-			minecraft_path_str = appData;
-			Log::info("StorageResolver::PathA", minecraft_path_str);
-		}
-		else {
-			_com_error err(code);
-			LPCTSTR errMsg = err.ErrorMessage();
-			std::cout << errMsg << std::endl;
+			Error(err.ErrorMessage());
 		}
 	}
 
-	StorageResolver::StorageResolver(const std::wstring& directory, const std::wstring& mirror) : StorageResolver() {
+	StorageResolver::StorageResolver(const std::tstring& directory, const std::tstring& mirror) : StorageResolver() {
 		addMirrorDirectory(directory, mirror);
 	}
 
-	StorageResolver::StorageResolver(const std::vector<std::wstring>& directories, const std::vector<std::wstring>& mirrors) : StorageResolver() {
+	StorageResolver::StorageResolver(const std::vector<std::tstring>& directories, const std::vector<std::tstring>& mirrors) : StorageResolver() {
 		addMirrorDirectory(directories, mirrors);
 	}
 
-	bool StorageResolver::addMirrorDirectory(const std::wstring& directory, const std::wstring& mirror) {
+	bool StorageResolver::addMirrorDirectory(const std::tstring& directory, const std::tstring& mirror) {
 
 
 		return true;
 	}
 
-	bool StorageResolver::addMirrorDirectory(const std::vector<std::wstring>& directories, const std::vector<std::wstring>& mirrors) {
+	bool StorageResolver::addMirrorDirectory(const std::vector<std::tstring>& directories, const std::vector<std::tstring>& mirrors) {
 		
 		return true;
 	}

@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Minecraft">
-      <UniqueIdentifier>{a73944f3-5533-4063-ae0a-b1d3ce5ea660}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Zenova">
       <UniqueIdentifier>{7e5b1e0f-de5f-4d74-9f0d-d06fbfbb08d6}</UniqueIdentifier>
     </Filter>
@@ -36,24 +33,6 @@
     <ClCompile Include="src\zenova\Zenova.cpp">
       <Filter>Source Files\Zenova</Filter>
     </ClCompile>
-    <ClCompile Include="src\Minecraft\Block.cpp">
-      <Filter>Source Files\Minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Minecraft\BlockLegacy.cpp">
-      <Filter>Source Files\Minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Minecraft\BlockTypeRegistry.cpp">
-      <Filter>Source Files\Minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Minecraft\Item.cpp">
-      <Filter>Source Files\Minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Minecraft\ItemRegistry.cpp">
-      <Filter>Source Files\Minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Minecraft\Util.cpp">
-      <Filter>Source Files\Minecraft</Filter>
-    </ClCompile>
     <ClCompile Include="src\Zenova\Mod.cpp">
       <Filter>Source Files\Zenova</Filter>
     </ClCompile>
@@ -73,6 +52,9 @@
       <Filter>Source Files\Zenova</Filter>
     </ClCompile>
     <ClCompile Include="src\Zenova\Hook.cpp">
+      <Filter>Source Files\Zenova</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Zenova\Common.cpp">
       <Filter>Source Files\Zenova</Filter>
     </ClCompile>
   </ItemGroup>
