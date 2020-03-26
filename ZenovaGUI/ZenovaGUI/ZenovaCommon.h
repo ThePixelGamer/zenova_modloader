@@ -15,7 +15,7 @@ namespace Zenova {
 
 	class Launcher {
 	public:
-		std::shared_ptr<AppUtils::AppDebugger> app;
+		AppUtils::AppDebugger* app; //avoid a smart pointer to avoid COM library issues
 		DWORD dwProcessId = 0;
 
 		Launcher();

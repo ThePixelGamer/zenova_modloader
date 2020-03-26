@@ -6,20 +6,21 @@ namespace Zenova {
 	
 	Launcher::Launcher() {
 		if(SUCCEEDED(CoInitialize(NULL))) {
-			app = std::make_shared<AppUtils::AppDebugger>(AppUtils::GetMinecraftPackageId());
+			app = new AppUtils::AppDebugger(AppUtils::GetMinecraftPackageId());
 			app->setStateChangeCallback(StateChangeCallbackFunc);
 			StateChangeCallbackFunc(app->GetPackageExecutionState());
 		}
 	}
 
 	Launcher::~Launcher() {
+		delete app;
 		CoUninitialize();
 	}
 
 	void Launcher::Start(bool forceRestart) {
 		HRESULT hresult = S_OK;
 
-		if(app.get()) {
+		if(app) {
 			if(app->GetPackageExecutionState() != PES_UNKNOWN) {
 				if(forceRestart) {
 					app->TerminateAllProcesses();
