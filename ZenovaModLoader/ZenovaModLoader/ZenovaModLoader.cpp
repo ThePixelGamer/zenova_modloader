@@ -43,7 +43,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		}
 	}
 
-    LaunchProcess("C:\\Windows\\System32\\vsjitdebugger.exe", std::string(" -p " + std::to_string(dwProcessId)));
+    //LaunchProcess("C:\\Windows\\System32\\vsjitdebugger.exe", std::string(" -p " + std::to_string(dwProcessId)));
 
 	if(dwProcessId != 0 && SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))) {
 		std::wstring AppFullName = AppUtils::GetMinecraftPackageId();
